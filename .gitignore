@@ -7,3 +7,5 @@ __pycache__/
 .claude/
 # Never commit keys
 .env
+# Share bundles
+*.zip
