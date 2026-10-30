@@ -27,6 +27,46 @@ PATIENTS = [
     },
 ]
 
+# Five more demo callers, each set up to show a different path. Synthetic, made up for the demo.
+#   (name, DOB, phone, city, scenario)
+DEMO_CALLERS = [
+    ("bkd-002", "Avery", "Collins", "1994-07-22", "510-555-0117", "Berkeley"),   # new referral, Eastside
+    ("bkd-003", "Morgan", "Lee", "1979-01-09", "415-555-0163", "San Francisco"),  # eval done: follow-ups allowed
+    ("bkd-004", "Harold", "Chen", "1958-05-30", "650-555-0181", "Daly City"),     # referral expired
+    ("bkd-005", "Nora", "Bennett", "1990-12-03", "408-555-0136", "San Jose"),     # already booked: reschedule
+    ("bkd-006", "Sam", "Patel", "2001-09-17", "925-555-0174", "Walnut Creek"),    # no referral on file
+]
+PATIENTS += [
+    {"resourceType": "Patient", "id": f"{pid}-pat", "name": [{"given": [given], "family": family}],
+     "birthDate": dob, "telecom": [{"system": "phone", "value": phone}], "address": [{"city": city, "state": "CA"}]}
+    for pid, given, family, dob, phone, city in DEMO_CALLERS
+]
+
+
+def _referral(pid, name, date, provider, dx, order, visits, valid_from, valid_to, done, notes):
+    return {
+        "documentReference": f"{pid}-doc-000",
+        "binary": f"{pid}-bin-000",
+        "date": date,
+        "type": "Referral to Physical Therapy",
+        "text": (
+            "REFERRAL TO PHYSICAL THERAPY\n"
+            f"Date: {date}\n"
+            f"Referring provider: {provider}\n"
+            f"Patient: {name}\n"
+            f"Diagnosis: {dx}\n"
+            f"Order: {order}\n"
+            f"Authorized visits: {visits}\n"
+            f"Referral valid: {valid_from} through {valid_to}\n"
+            f"Notes: {notes}"
+        ),
+        "authorized_visit_types": ["PT Evaluation", "PT Follow-up"],
+        "valid_from": valid_from,
+        "valid_to": valid_to,
+        "completed_evaluation": done,
+    }
+
+
 # DocumentReference -> Binary, flattened.
 REFERRALS = {
     "pmlab-f-001-df8d27e9-pat": {
@@ -49,7 +89,28 @@ REFERRALS = {
         "valid_from": "2026-10-27",
         "valid_to": "2026-12-27",
         "completed_evaluation": False,
-    }
+    },
+    "bkd-002-pat": _referral(
+        "bkd-002", "Avery Collins", "2026-10-26", "Elena Ruiz, MD (Sports Medicine)",
+        "Left ankle sprain, grade II (S93.402A)", "PT evaluation and treatment, 2x/week x 4 weeks",
+        "1 evaluation + up to 8 follow-ups", "2026-10-26", "2026-12-26", False,
+        "Begin with initial evaluation. Patient lives near the Eastside clinic."),
+    "bkd-003-pat": _referral(
+        "bkd-003", "Morgan Lee", "2026-10-01", "Priya Shah, MD (Orthopedics)",
+        "Chronic low back pain (M54.50)", "PT treatment, 2x/week x 8 weeks",
+        "1 evaluation + up to 16 follow-ups", "2026-10-01", "2026-12-31", True,
+        "Initial evaluation completed 2026-10-20 with Dana Kim, PT. Continue follow-ups."),
+    "bkd-004-pat": _referral(
+        "bkd-004", "Harold Chen", "2026-08-01", "James Okafor, MD (Family Medicine)",
+        "Right shoulder impingement (M75.41)", "PT evaluation and treatment, 2x/week x 6 weeks",
+        "1 evaluation + up to 12 follow-ups", "2026-08-01", "2026-10-15", False,
+        "Patient did not schedule during the referral window."),
+    "bkd-005-pat": _referral(
+        "bkd-005", "Nora Bennett", "2026-10-28", "Priya Shah, MD (Orthopedics)",
+        "Post-op rehab, right ACL reconstruction 2026-10-14 (Z47.89)", "PT evaluation and treatment, 3x/week x 8 weeks",
+        "1 evaluation + up to 24 follow-ups", "2026-10-28", "2027-01-28", False,
+        "Evaluation already scheduled. Patient prefers afternoons."),
+    # Sam Patel (bkd-006) has no referral on file on purpose.
 }
 
 POLICY = {
@@ -141,14 +202,44 @@ REQUESTS = [
 ]
 
 
+def _request(rid, pid, name, phone, need, status="New", prefs=None, notes=None):
+    return {"id": rid, "patient_name": name, "patient_id": f"{pid}-pat", "need": need, "status": status,
+            "phone": phone, "preferred_times": "", "patient_preferences": prefs, "selected_slot": None,
+            "next_action": "", "notes": notes or [], "review": None, "preference_history": [], "last_search": None}
+
+
+REQUESTS += [
+    _request("R002", "bkd-002", "Avery Collins", "510-555-0117", "PT evaluation per sports medicine referral (2026-10-26)"),
+    _request("R003", "bkd-003", "Morgan Lee", "415-555-0163", "PT follow-ups (evaluation completed 2026-10-20)",
+             prefs={"time_of_day": "morning", "location": "Downtown", "provider": "Dana Kim, PT",
+                    "notes": "Likes to keep the same therapist."}),
+    _request("R004", "bkd-004", "Harold Chen", "650-555-0181", "PT evaluation per family medicine referral (2026-08-01)"),
+    _request("R005", "bkd-005", "Nora Bennett", "408-555-0136", "PT evaluation after ACL reconstruction", status="Booked",
+             prefs={"time_of_day": "afternoon", "location": "Eastside", "notes": "Post-op; rides with a family member."}),
+    _request("R006", "bkd-006", "Sam Patel", "925-555-0174", "Called about PT for a shoulder; no referral received yet"),
+]
+
+
+def _book_nora(slots, requests):
+    """Nora starts with an evaluation already booked so the reschedule flow has something to move."""
+    sl = next(s for s in slots if s["status"] == "Available" and s["visit_type"] == "PT Evaluation"
+              and s["location"] == "Eastside" and s["start"] >= "2026-11-04" and int(s["start"][11:13]) >= 12)
+    sl["status"], sl["booked_for"] = "Booked", "bkd-005-pat"
+    req = next(r for r in requests if r["id"] == "R005")
+    req["selected_slot"] = sl["id"]
+    req["notes"].append(f"2026-10-29 Front desk booked {sl['id']} (evaluation, {sl['provider']}, Eastside).")
+
+
 def seed():
+    slots, requests = _slots(), copy.deepcopy(REQUESTS)
+    _book_nora(slots, requests)
     return {
         "patients": copy.deepcopy(PATIENTS),
         "referrals": copy.deepcopy(REFERRALS),
         "policy": copy.deepcopy(POLICY),
         "provider_prefs": copy.deepcopy(PROVIDER_PREFS),
-        "slots": _slots(),
-        "requests": copy.deepcopy(REQUESTS),
+        "slots": slots,
+        "requests": requests,
         "outbox": [],
         "corrections": [],
         "candidate_rules": [],

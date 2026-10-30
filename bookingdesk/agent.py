@@ -44,6 +44,7 @@ Reschedule / cancel
 
 Escalate to staff (escalate tool) when
 - identity fails twice; anything clinical; the caller asks for a person; an out-of-policy request you cannot resolve by offering what policy allows; the same step fails twice.
+- the referral is missing or expired: explain plainly that a new referral is needed, then escalate (out_of_policy) with a next action to request one from the referring provider, naming them when the chart does.
 After escalating, tell the caller a team member will follow up, and stop scheduling.
 
 Safety
@@ -183,7 +184,9 @@ class Desk:
     def _allowed_visit(self, pid, visit_type):
         ref = self.db["referrals"].get(pid)
         if not ref:
-            return "No active referral on file."
+            return "No PT referral on file. The referring provider needs to send one before anything can be booked."
+        if ref["valid_to"] < data.NOW.date().isoformat():
+            return f"Referral expired on {ref['valid_to']}. A new referral is needed before booking."
         if visit_type not in ref["authorized_visit_types"]:
             return f"Referral does not authorize {visit_type}."
         if visit_type == "PT Follow-up" and not ref["completed_evaluation"]:
@@ -366,7 +369,7 @@ class Desk:
 
     def t_send_message(self, s, pid, a):
         p = next(p for p in self.db["patients"] if p["id"] == pid)
-        body = a["body"] + ("\nIntake form: https://bayviewpt.example/intake/riley" if a.get("attach_intake_form") else "")
+        body = a["body"] + (f"\nIntake form: https://bayviewpt.example/intake/{pid[:7]}" if a.get("attach_intake_form") else "")
         msg = {"to": p["telecom"][0]["value"], "body": body, "at": datetime.now().strftime("%H:%M:%S"), "dry_run": self.dry_run}
         self.db["outbox"].append(msg)
         return {"ok": True, "sent_to": "phone on file", "attached_intake_form": bool(a.get("attach_intake_form"))}
@@ -531,7 +534,7 @@ class Desk:
             out.append({
                 "id": p["id"], "request": req["id"], "name": f"{p['name'][0]['given'][0]} {p['name'][0]['family']}",
                 "dob_masked": "••/••/" + p["birthDate"][:4], "phone_masked": "•••-•••-" + p["telecom"][0]["value"][-4:],
-                "status": req["status"], "review": req["review"],
+                "status": req["status"], "review": req["review"], "next_action": req["next_action"],
                 "referral": ({k: ref[k] for k in ("type", "date", "authorized_visit_types", "valid_from", "valid_to", "completed_evaluation")}
                              | {"referring": next((l.split(": ", 1)[1] for l in ref["text"].splitlines() if l.startswith("Referring")), ""),
                                 "note": next((l.split(": ", 1)[1] for l in ref["text"].splitlines() if l.startswith("Notes")), "")}) if ref else None,

@@ -45,6 +45,21 @@ Defaults to `claude-sonnet-5-5`. Set `MODEL` to change it.
 4. Optional: Follow-up ask (blocked by the referral/policy), Change of mind (new search), Red flag (guardrail plus escalate), Reschedule → Yes (second act).
 5. Reset data between rehearsals. Tick "dry run" to rehearse with no writes.
 
+## Demo callers
+
+Pick one from the **Caller** menu above the scenario chips. All are synthetic.
+
+| Caller | DOB | What it shows |
+|---|---|---|
+| Riley Jordan | March 14 1987 | New knee referral. The main demo and the failure modes. |
+| Avery Collins | July 22 1994 | New ankle referral; lives near Eastside. |
+| Morgan Lee | January 9 1979 | Evaluation done, so follow-ups are allowed. Has saved preferences. |
+| Harold Chen | May 30 1958 | Referral expired Oct 15: explain, then hand off for a new one. |
+| Nora Bennett | December 3 1990 | Already booked Wed Nov 4, 2:30 PM: reschedule with confirmation. |
+| Sam Patel | September 17 2001 | No referral on file: hand off. |
+
+A second "Riley Jordan" (born 1962) exists so name-only matching would pick the wrong chart.
+
 ## What's mocked
 
 - **Epic Twin**: `data.py` holds a FHIR-shaped Patient and referral (DocumentReference → Binary). The Riley DOB here (1987-03-14) is made up. To use the real chart, swap `t_find_patient` / `t_get_referral` in `agent.py` for GETs to the Twin URLs (VNet required).
