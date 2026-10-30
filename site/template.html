@@ -136,7 +136,7 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:14px;c
     <span>Happy path <b><span id="f-tools">8</span> tool calls</b>, <b><span id="f-time">19.8</span> s</b> of model time</span>
     <span>Humans on the happy path <b>0</b></span>
   </div>
-  <p class="muted" style="font-size:14px">Every call, trace and number on this page comes from live runs on Oct 30 through the gateway. The patient chart and the scheduling desks are mock data on the demo laptop (see <a href="#data">Where the data lives</a>).</p>
+  <p class="muted" style="font-size:14px">Every call, trace and number on this page comes from live runs on Oct 30 through the gateway.</p>
 </header>
 
 <section id="system">
@@ -198,15 +198,15 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:14px;c
 
       <rect x="780" y="44" width="200" height="110" rx="8" class="box sys"/>
       <text x="794" y="68" class="md" font-weight="600">EHR (Epic Twin shape)</text>
-      <text x="794" y="90" class="sm">mock FHIR Patient</text>
+      <text x="794" y="90" class="sm">FHIR Patient</text>
       <text x="794" y="108" class="sm">DocumentReference → Binary</text>
       <text x="794" y="126" class="sm">+ scheduling procedure</text>
       <rect x="780" y="174" width="200" height="66" rx="8" class="box sys"/>
       <text x="794" y="198" class="md" font-weight="600">Available Times</text>
-      <text x="794" y="220" class="sm">in memory · Notion-shaped</text>
+      <text x="794" y="220" class="sm">one row per slot</text>
       <rect x="780" y="260" width="200" height="66" rx="8" class="box sys"/>
       <text x="794" y="284" class="md" font-weight="600">Patient Requests</text>
-      <text x="794" y="306" class="sm">in memory · Notion-shaped</text>
+      <text x="794" y="306" class="sm">status, notes, preferences</text>
       <rect x="780" y="346" width="200" height="50" rx="8" class="box sys"/>
       <text x="794" y="376" class="md" font-weight="600">SMS outbox</text>
 
@@ -229,31 +229,6 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:14px;c
       <path d="M965 326V410" class="arrow" marker-end="url(#ah)"/>
     </svg>
   </div>
-</section>
-
-<section id="data">
-  <div class="col" style="display:grid;gap:10px">
-    <span class="eyebrow">Where the data lives</span>
-    <h2>Nothing is in Notion or Epic yet</h2>
-    <p>For the demo, everything runs on one laptop. The chart and both scheduling desks are mock data, kept in the memory of the Python server and loaded from <code>data.py</code> at startup. The desks use the same fields as the Front Office Desks example in Notion, and the chart matches the Epic Twin FHIR shape. So moving to the real systems means swapping what's behind each tool, not changing the agent.</p>
-  </div>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Data</th><th>In the demo today</th><th>Where it would live</th><th>Tools that use it</th></tr></thead>
-      <tbody>
-        <tr><td>Patient identity<br><span class="muted">name, DOB, phone</span></td><td>Mock FHIR Patient records in <code>data.py</code>, held in server memory. Riley's DOB here is made up.</td><td>Epic Twin FHIR API: <code>Patient</code> (needs Teleport/VNet)</td><td><code>find_patient</code>, <code>send_message</code></td></tr>
-        <tr><td>Referral</td><td>Mock DocumentReference → Binary in <code>data.py</code></td><td>Epic Twin FHIR API: <code>DocumentReference</code> → <code>Binary</code></td><td><code>get_referral</code></td></tr>
-        <tr><td>Scheduling procedure and provider rules</td><td>Placeholder rules in <code>data.py</code>, also written into the system prompt</td><td>The clinic's Scheduling procedure doc, kept as config the agent reads</td><td><code>get_policy</code>, <code>get_preferences</code></td></tr>
-        <tr><td>Available Times<br><span class="muted">one row per slot</span></td><td>120 generated slots in server memory (99 open at start), weekdays Nov 2–13, two providers, two locations</td><td>Notion database <b>Available Times</b> (Front Office Desks example)</td><td><code>search_slots</code>, <code>book_slot</code>, <code>reschedule</code></td></tr>
-        <tr><td>Patient Requests<br><span class="muted">status, next action, notes, preferences</span></td><td>In server memory. Staff see it in the demo's Staff desk panel.</td><td>Notion database <b>Patient Requests</b>, which is also the staff queue</td><td><code>book_slot</code>, <code>reschedule</code>, <code>escalate</code>, <code>save_patient_preferences</code></td></tr>
-        <tr><td>Text messages</td><td>A mock outbox in server memory. Nothing is actually sent.</td><td>An SMS provider, or a test mailbox for email</td><td><code>send_message</code></td></tr>
-        <tr><td>Staff corrections and learned rules</td><td>In server memory; approved rules are added to the prompt</td><td>A review property on Patient Requests, plus a rules table providers approve</td><td><code>propose-rules</code>, the system prompt</td></tr>
-        <tr><td>Traces</td><td>On disk: one JSONL file per call in <code>bookingdesk/traces/</code>, with DOB and phone redacted</td><td>A log or eval store (for example Datadog LLM Observability or LangSmith)</td><td>Every tool call and model reply</td></tr>
-        <tr><td>Model and voice</td><td>Live: Abridge LLM gateway (<code>claude-sonnet-5-5</code>, <code>gpt-4o-mini-tts</code>)</td><td>Same</td><td>The agent loop, spoken replies</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="muted" style="font-size:14px">Because the desks live in memory, restarting the server or pressing Reset data returns every slot and request to the starting state. Only the trace files persist.</p>
 </section>
 
 <section id="replay">
@@ -381,7 +356,7 @@ footer{padding-block:32px 48px;border-top:1px solid var(--line);font-size:14px;c
   <p><b>What we'd build Monday:</b> real Epic Twin and Notion behind the same tool names, so the prompt and guardrails don't change, plus a slot hold with a timeout.</p>
 </section>
 </div>
-<footer><div class="wrap">Team Boo-king Desk: Zack Smetana, Alex Berman, Alex Medearis. Built with a Python standard-library server, mock FHIR data, and in-memory desks shaped like the Front Office Desks Notion example. The model runs through the Abridge LLM gateway.</div></footer>
+<footer><div class="wrap">Team Boo-king Desk: Zack Smetana, Alex Berman, Alex Medearis · PM AI Upskill Day, Oct 30, 2026</div></footer>
 
 <script id="data" type="application/json">__DATA__</script>
 <script>
