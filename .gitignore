@@ -1,0 +1,9 @@
+# Per-call traces (redacted, but they're runtime output)
+bookingdesk/traces/
+__pycache__/
+*.pyc
+.DS_Store
+# Local editor/preview config
+.claude/
+# Never commit keys
+.env

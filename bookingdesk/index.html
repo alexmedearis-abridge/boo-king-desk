@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boo-king Desk</title>
+<style>
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1d1d1b;--muted:#6b6a65;--line:#e4e2dc;--accent:#c2410c;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--blue:#1d4ed8;--chip:#f1efe9}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:16px;margin:0}
+header .sub{color:var(--muted);font-size:12px}
+header .sp{flex:1}
+button{font:inherit;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:#bbb}
+button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pill{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--chip);color:var(--muted)}
+.pill.ok{background:#dcfce7;color:var(--ok)}.pill.bad{background:#fee2e2;color:var(--bad)}.pill.warn{background:#fef3c7;color:var(--warn)}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1.25fr);gap:10px;padding:10px;min-height:0}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-height:0}
+section>h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0;padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.scroll{overflow:auto;flex:1;padding:10px 12px}
+.msg{max-width:85%;padding:8px 11px;border-radius:12px;margin:6px 0;white-space:pre-wrap}
+.msg.patient{background:var(--chip);margin-left:auto;border-bottom-right-radius:3px}
+.msg.agent{background:#fff7ed;border:1px solid #fed7aa;border-bottom-left-radius:3px}
+.msg.thinking{color:var(--muted);font-style:italic;background:none;border:1px dashed var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;border-top:1px solid var(--line)}
+.chips button{font-size:12px;padding:3px 8px;background:var(--chip);border-color:transparent}
+.composer{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--line)}
+.composer input{flex:1;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px}
+.t{border-left:3px solid var(--line);padding:5px 8px;margin:6px 0;font-size:12.5px}
+.t .h{display:flex;gap:8px;align-items:baseline}
+.t .tool{font-family:ui-monospace,Menlo,monospace;font-weight:600}
+.t .lat{color:var(--muted);font-size:11px;margin-left:auto}
+.t .reason{color:var(--muted)}
+.t pre{margin:4px 0 0;font:11px/1.35 ui-monospace,Menlo,monospace;background:#faf9f6;padding:6px;border-radius:4px;max-height:160px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.t.tool-ok{border-color:var(--ok)}.t.tool-err{border-color:var(--bad)}.t.esc{border-color:var(--warn);background:#fffbeb}
+.t.patient{border-color:#a8a29e}.t.agent{border-color:var(--accent)}.t.guard{border-color:var(--bad);background:#fef2f2}.t.staff{border-color:var(--blue);background:#eff6ff}
+details summary{cursor:pointer;color:var(--muted);font-size:11px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500}
+tr.mine td{background:#fff7ed}
+.sub-h{font-size:12px;font-weight:600;margin:14px 0 6px;display:flex;gap:8px;align-items:center}
+.card{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:12.5px}
+.card .notes{color:var(--muted);font-size:12px;margin-top:4px}
+.sms{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:6px 9px;margin:5px 0;font-size:12px;white-space:pre-wrap}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto;justify-content:flex-end}
+.tabs button{font-size:11px;padding:2px 8px;text-transform:none;letter-spacing:0}
+.tabs button.on{background:var(--ink);color:#fff}
+.flip{font-size:11px;padding:1px 6px}
+.hidden{display:none}
+textarea{width:100%;font:inherit;font-size:12px}
+@media (max-width:1000px){main{grid-template-columns:1fr;overflow:auto}section{min-height:420px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Boo-king Desk</h1>
+  <span class="sub">Hyro-style scheduling agent · Bayview Physical Therapy</span>
+  <span class="sp"></span>
+  <span id="backend" class="pill" style="cursor:pointer" title="Click to set the model">⚙ </span>
+  <label class="sub"><input type="checkbox" id="dry"> dry run</label>
+  <label class="sub"><input type="checkbox" id="speak"> speak replies</label>
+  <select id="voice" class="sub" title="Voice for spoken replies">
+    <option value="coral" selected>Coral (natural)</option>
+    <option value="sage">Sage (natural)</option>
+    <option value="nova">Nova (natural)</option>
+    <option value="shimmer">Shimmer (natural)</option>
+    <option value="ash">Ash (natural)</option>
+    <option value="ballad">Ballad (natural)</option>
+    <option value="browser">Browser voice (offline)</option>
+  </select>
+  <button id="newcall">New call</button>
+  <button id="reset">Reset data</button>
+</header>
+<div id="cfg" class="hidden" style="padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px">
+  <label><input type="radio" name="be" value="gw" checked> Abridge gateway</label>
+  <label><input type="radio" name="be" value="an"> Anthropic API key</label>
+  <span id="gwf" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <input id="gwurl" size="42" value="https://llm-gateway-evals.abridge.coffee/v1">
+    <button id="listm">List models</button>
+  </span>
+  <input id="akey" class="hidden" type="password" size="30" placeholder="sk-ant-...">
+  <input id="model" list="mlist" size="28" placeholder="model">
+  <datalist id="mlist"></datalist>
+  <button class="primary" id="savecfg">Use this model</button>
+  <span id="cfgmsg" style="color:var(--muted)"></span>
+</div>
+<main>
+  <section>
+    <h2>Patient call <span id="verified" class="pill">unverified</span></h2>
+    <div class="scroll" id="chat"></div>
+    <div class="chips" id="chips"></div>
+    <div class="composer">
+      <button id="mic" title="Talk (Chrome)">🎤</button>
+      <input id="input" placeholder="Type as the caller…" autocomplete="off">
+      <button class="primary" id="send">Send</button>
+    </div>
+  </section>
+  <section>
+    <h2>Agent trace <span class="pill" id="tcount">0</span>
+      <span class="tabs"><button id="showprompt">System prompt</button></span></h2>
+    <div class="scroll" id="trace"></div>
+    <div class="scroll hidden" id="prompt"><pre style="white-space:pre-wrap;font-size:12px" id="prompttext"></pre></div>
+  </section>
+  <section>
+    <h2>Staff desk
+      <span class="tabs" id="stabs">
+        <button data-t="requests" class="on">Requests</button>
+        <button data-t="slots">Available Times</button>
+        <button data-t="sms">SMS</button>
+        <button data-t="learn">Learning</button>
+      </span></h2>
+    <div class="scroll" id="staff"></div>
+  </section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+let sid = 'call-' + Date.now().toString(36);
+let S = null, traceLen = 0, tab = 'requests', slotFilter = 'avail', sending = false;
+
+const SCENARIOS = [
+  ['Open', "Hi, I need to schedule the physical therapy appointment my doctor referred me for."],
+  ['Identify', "Riley Jordan, March 14 1987."],
+  ['Wrong DOB', "This is Riley Jordan, born June 2 1990."],
+  ['Prefs', "Mornings are best. Downtown, any weekday."],
+  ['Pick first', "The first one works for me."],
+  ['Follow-up ask', "Actually can I just book a follow-up visit instead?"],
+  ['Change of mind', "Actually, no mornings, and Downtown only."],
+  ['Red flag', "Also, my leg went numb and cold this morning."],
+  ['Human', "Can I talk to a person please?"],
+  ['Reschedule', "Hi, it's Riley Jordan, March 14 1987. I need to move my PT appointment."],
+  ['Yes', "Yes, go ahead."],
+];
+$('#chips').innerHTML = SCENARIOS.map((s,i)=>`<button data-i="${i}" title="${esc(s[1])}">${s[0]}</button>`).join('');
+$('#chips').onclick = e => { const i = e.target.dataset.i; if (i!=null){ $('#input').value = SCENARIOS[i][1]; $('#input').focus(); } };
+
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+async function api(p, body){ const r = await fetch(p, body===undefined?{}:{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}); return r.json(); }
+
+async function send(){
+  const text = $('#input').value.trim(); if (!text || sending) return;
+  sending = true; $('#input').value = '';
+  renderChat(text);
+  const r = await api('/api/chat', {session: sid, text});
+  sending = false;
+  if (r.error) alert(r.error);
+  poll();
+  if (r.reply && $('#speak').checked) speak(r.reply);
+}
+
+// Natural voice from the gateway's TTS model; falls back to the best browser voice.
+let audioEl = null;
+async function speak(text){
+  const v = $('#voice').value;
+  if (v !== 'browser') {
+    try {
+      const res = await fetch('/api/tts', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({text, voice: v})});
+      if (res.ok) {
+        if (audioEl) audioEl.pause();
+        audioEl = new Audio(URL.createObjectURL(await res.blob()));
+        await audioEl.play();
+        return;
+      }
+    } catch (e) {}
+  }
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  const voices = speechSynthesis.getVoices().filter(x => x.lang.startsWith('en'));
+  u.voice = voices.find(x => /premium|enhanced|natural|neural/i.test(x.name)) || voices.find(x => /google us english|samantha|ava/i.test(x.name)) || voices[0] || null;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+$('#send').onclick = send;
+$('#input').onkeydown = e => { if (e.key==='Enter') send(); };
+$('#newcall').onclick = () => { sid = 'call-' + Date.now().toString(36); traceLen = 0; $('#trace').innerHTML=''; renderChat(); };
+$('#reset').onclick = async () => { if(!confirm('Reset all slots, requests and calls to seed data?'))return; await api('/api/reset', {}); traceLen=0; $('#trace').innerHTML=''; sid='call-'+Date.now().toString(36); poll(); };
+$('#dry').onchange = e => api('/api/dry_run', {on: e.target.checked});
+$('#showprompt').onclick = e => { $('#prompt').classList.toggle('hidden'); $('#trace').classList.toggle('hidden'); e.target.classList.toggle('on'); };
+$('#stabs').onclick = e => { const t=e.target.dataset.t; if(!t)return; tab=t; document.querySelectorAll('#stabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); renderStaff(); };
+
+// Model settings panel.
+$('#backend').onclick = () => $('#cfg').classList.toggle('hidden');
+document.querySelectorAll('[name=be]').forEach(r => r.onchange = () => {
+  const gw = $('[name=be]:checked').value === 'gw';
+  $('#gwf').style.display = gw ? 'flex' : 'none'; $('#akey').classList.toggle('hidden', gw);
+  $('#model').placeholder = gw ? 'model (pick from list)' : 'claude-sonnet-5-5 (default)';
+});
+$('#listm').onclick = async () => {
+  $('#cfgmsg').textContent = 'asking the gateway…';
+  await api('/api/config', {LLM_BASE_URL: $('#gwurl').value, ANTHROPIC_API_KEY: ''});
+  const r = await api('/api/models', {});
+  if (r.error) { $('#cfgmsg').textContent = r.error; return; }
+  $('#mlist').innerHTML = r.models.map(m => `<option value="${esc(m)}">`).join('');
+  $('#cfgmsg').textContent = `${r.models.length} models. Click the model box to choose.`;
+};
+$('#savecfg').onclick = async () => {
+  const gw = $('[name=be]:checked').value === 'gw';
+  const body = gw ? {LLM_BASE_URL: $('#gwurl').value, MODEL: $('#model').value, ANTHROPIC_API_KEY: ''}
+                  : {ANTHROPIC_API_KEY: $('#akey').value, MODEL: $('#model').value, LLM_BASE_URL: ''};
+  if (gw && !body.MODEL) { $('#cfgmsg').textContent = 'Pick a model first.'; return; }
+  const r = await api('/api/config', body);
+  $('#cfgmsg').textContent = r.backend ? 'Using ' + r.backend : 'Not configured';
+  poll();
+};
+
+// Voice in via the browser's speech recognition (Chrome).
+// A fresh recognizer per press: reusing one throws if Chrome hasn't fully ended the last session.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+function sendWhenFree(){ if (sending) return setTimeout(sendWhenFree, 300); send(); }
+if (SR) {
+  $('#mic').onclick = () => {
+    if (rec) { rec.stop(); return; }  // second press stops listening
+    if (audioEl) audioEl.pause();
+    if ('speechSynthesis' in window) speechSynthesis.cancel();  // don't transcribe our own voice
+    rec = new SR(); rec.lang = 'en-US'; rec.interimResults = true;
+    rec.onresult = e => {
+      $('#input').value = Array.from(e.results).map(r => r[0].transcript).join('');
+      if (e.results[e.results.length-1].isFinal) sendWhenFree();
+    };
+    rec.onerror = e => { if (e.error !== 'no-speech' && e.error !== 'aborted') $('#input').placeholder = 'Mic error: ' + e.error; };
+    rec.onend = () => { rec = null; $('#mic').style.background = ''; };
+    try { rec.start(); $('#mic').style.background = '#fee2e2'; }
+    catch (e) { rec = null; $('#input').placeholder = 'Mic error: ' + e.message; }
+  };
+} else $('#mic').style.display='none';
+
+function renderChat(pending){
+  const s = S?.sessions?.[sid];
+  const tr = s?.transcript || [];
+  let h = tr.map(m=>`<div class="msg ${m.who}">${esc(m.text)}</div>`).join('');
+  if (pending && !(tr.length && tr[tr.length-1].text===pending && tr[tr.length-1].who==='patient')) h += `<div class="msg patient">${esc(pending)}</div>`;
+  if (sending || s?.busy) h += `<div class="msg thinking">agent is working…</div>`;
+  if (!tr.length && !pending) h = `<div class="sub" style="color:var(--muted)">New call. Type as the caller, use the scenario chips, or hold the mic.</div>`;
+  const el = $('#chat'); el.innerHTML = h; el.scrollTop = el.scrollHeight;
+  const v = s?.verified; $('#verified').textContent = v?'identity verified':'unverified'; $('#verified').className='pill '+(v?'ok':'');
+}
+
+function traceItem(t){
+  const lat = t.latency_ms!=null ? `<span class="lat">${t.latency_ms} ms${t.llm_ms!=null?` · llm ${t.llm_ms} ms`:''}</span>` : '';
+  if (t.kind==='tool'){
+    const err = t.result && (t.result.error || t.result.ok===false || t.result.match===false || t.result.blocked || (t.result.slots && !t.result.slots.length));
+    const cls = t.tool==='escalate' ? 'esc' : err ? 'tool-err' : 'tool-ok';
+    return `<div class="t ${cls}"><div class="h"><span class="tool">${esc(t.tool)}</span>${t.dry_run?'<span class="pill warn">dry run</span>':''}${lat}</div>
+      <div class="reason">${esc(t.reason)}</div>
+      <details ${err||t.tool==='escalate'?'open':''}><summary>args + result</summary><pre>${esc(JSON.stringify(t.args))}\n→ ${esc(JSON.stringify(t.result,null,1))}</pre></details></div>`;
+  }
+  if (t.kind==='patient') return `<div class="t patient"><b>Caller:</b> ${esc(t.text)}</div>`;
+  if (t.kind==='agent_reply') return `<div class="t agent"><div class="h"><b>Agent says</b>${lat}</div>${esc(t.text)}</div>`;
+  if (t.kind==='agent_thought') return `<div class="t agent" style="opacity:.75"><div class="h"><b>Agent (between tools)</b>${lat}</div>${esc(t.text)}</div>`;
+  if (t.kind==='guardrail') return `<div class="t guard"><b>Guardrail · ${esc(t.rule)}</b> ${esc(t.detail)}</div>`;
+  if (t.kind==='staff') return `<div class="t staff"><b>Staff · ${esc(t.action)}</b> <pre>${esc(JSON.stringify(Object.fromEntries(Object.entries(t).filter(([k])=>!['ts','session','kind','action'].includes(k)))))}</pre></div>`;
+  if (t.kind==='error') return `<div class="t guard"><b>Error</b> ${esc(t.detail)}</div>`;
+  return '';
+}
+
+function renderStaff(){
+  if (!S) return;
+  const el = $('#staff'); let h = '';
+  if (tab==='requests'){
+    h += S.requests.map(r=>{
+      const sl = S.slots.find(x=>x.id===r.selected_slot);
+      const st = {New:'',Booked:'ok',Waiting:'warn'}[r.status] ?? '';
+      const rev = r.status==='Booked' && r.review==='pending' ? `<div style="margin-top:6px;display:flex;gap:6px">
+          <button onclick="review('${r.id}','approved')">Approve</button>
+          <button onclick="correct('${r.id}')">Correct…</button></div>` : r.review && r.review!=='pending' ? `<span class="pill">${r.review}</span>` : '';
+      return `<div class="card"><div style="display:flex;gap:8px;align-items:center"><b>${esc(r.id)} · ${esc(r.patient_name)}</b><span class="pill ${st}">${esc(r.status)}</span></div>
+        <div>${esc(r.need)}</div>
+        ${sl?`<div>Selected slot: <b>${esc(sl.id)}</b> ${esc(sl.label)} · ${esc(sl.provider)} · ${esc(sl.location)}</div>`:''}
+        ${r.preferred_times?`<div>Preferred: ${esc(r.preferred_times)}</div>`:''}
+        ${r.next_action?`<div style="color:var(--warn)"><b>Next action:</b> ${esc(r.next_action)}</div>`:''}
+        ${r.notes.length?`<div class="notes">${r.notes.map(esc).join('<br>')}</div>`:''}${rev}</div>`;
+    }).join('');
+  } else if (tab==='slots'){
+    h += `<div style="display:flex;gap:6px;margin-bottom:6px"><button onclick="slotFilter='avail';renderStaff()" class="${slotFilter==='avail'?'primary':''}">Available evaluations</button><button onclick="slotFilter='all';renderStaff()" class="${slotFilter==='all'?'primary':''}">All slots</button></div>
+      <div class="sub" style="color:var(--muted);margin-bottom:6px">Slot race: after the agent offers a slot, click <b>Flip</b> on it before the caller accepts.</div>`;
+    const rows = S.slots.filter(s=> slotFilter==='all' || (s.visit_type==='PT Evaluation' && (s.status==='Available' || s.booked_for)));
+    h += `<table><tr><th>ID</th><th>When</th><th>Provider</th><th>Loc</th><th>Type</th><th>Status</th><th></th></tr>` +
+      rows.map(s=>`<tr class="${s.booked_for?'mine':''}"><td>${s.id}</td><td>${esc(s.label)}</td><td>${esc(s.provider.replace(', PT',''))}</td><td>${s.location}</td><td>${s.visit_type.replace('PT ','')}</td>
+        <td><span class="pill ${s.status==='Available'?'ok':''}">${s.status}</span>${s.booked_for?' <span class="pill warn">Riley</span>':''}</td>
+        <td><button class="flip" onclick="flip('${s.id}')">Flip</button></td></tr>`).join('') + `</table>`;
+  } else if (tab==='sms'){
+    h += S.outbox.length ? S.outbox.slice().reverse().map(m=>`<div class="sms"><div class="sub" style="color:var(--muted)">to ${esc(m.to)} · ${esc(m.at)}${m.dry_run?' · dry run':''}</div>${esc(m.body)}</div>`).join('') : '<div style="color:var(--muted)">No messages sent yet.</div>';
+  } else {
+    h += `<div class="sub-h">Provider rules</div>` + Object.entries(S.provider_prefs).map(([p,v])=>`<div class="card"><b>${esc(p)}</b>
+        <div><span class="pill bad">hard</span> ${v.hard.map(esc).join(' · ')}</div>
+        <div><span class="pill">soft</span> ${v.soft.map(esc).join(' · ')}</div>
+        ${(v.learned||[]).length?`<div><span class="pill ok">learned</span> ${v.learned.map(esc).join(' · ')}</div>`:''}</div>`).join('');
+    h += `<div class="sub-h">Staff corrections <span class="pill">${S.corrections.length}</span> <button onclick="propose()" ${S.corrections.length?'':'disabled'}>propose-rules</button></div>`;
+    h += S.corrections.map(c=>`<div class="card">${esc(c.booking||'')} · ${esc(c.provider||'')}<br><i>${esc(c.correction)}</i></div>`).join('');
+    if (S.candidate_rules.length) h += `<div class="sub-h">Candidate rules (need approval)</div>` + S.candidate_rules.map((c,i)=>`<div class="card"><b>${esc(c.provider)}</b>: ${esc(c.rule)} <button onclick="approve(${i})">Approve</button></div>`).join('');
+  }
+  const top = el.scrollTop; el.innerHTML = h; el.scrollTop = top;
+}
+async function flip(id){ await api('/api/flip',{slot_id:id}); poll(); }
+async function review(id,v,c){ await api('/api/review',{request:id,verdict:v,correction:c||''}); poll(); }
+function correct(id){ const c = prompt('What should the agent have done? (e.g. "Dana does evaluations at Downtown only before 11")'); if (c) review(id,'corrected',c); }
+async function propose(){ const r = await api('/api/propose_rules',{}); if (r.error) alert(r.error); poll(); }
+async function approve(i){ await api('/api/approve_rule',{index:i}); poll(); }
+window.flip=flip; window.review=review; window.correct=correct; window.propose=propose; window.approve=approve;
+
+async function poll(){
+  try {
+    S = await api('/api/state?since=' + traceLen);
+    const el = $('#trace'); const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    const mine = S.trace.filter(t => t.session===sid || t.session==='staff');
+    el.insertAdjacentHTML('beforeend', mine.map(traceItem).join(''));
+    traceLen = S.trace_len;
+    if (atBottom) el.scrollTop = el.scrollHeight;
+    $('#tcount').textContent = el.querySelectorAll('.t').length;
+    $('#backend').textContent = '⚙ ' + (S.backend || 'no model configured · click to set'); $('#backend').className = 'pill ' + (S.backend?'ok':'bad');
+    $('#dry').checked = S.dry_run;
+    $('#prompttext').textContent = S.system_prompt;
+    renderChat(); renderStaff();
+  } catch(e) {}
+}
+setInterval(poll, 1000); poll();
+</script>
+</body>
+</html>
