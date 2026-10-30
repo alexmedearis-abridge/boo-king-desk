@@ -52,6 +52,7 @@ class H(BaseHTTPRequestHandler):
             b = open(os.path.join(HERE, "index.html"), "rb").read()
             self.send_response(200)
             self.send_header("content-type", "text/html; charset=utf-8")
+            self.send_header("cache-control", "no-store")  # always load the current page after an update
             self.end_headers()
             self.wfile.write(b)
         elif self.path.startswith("/api/tts?"):
