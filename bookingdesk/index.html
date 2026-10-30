@@ -51,6 +51,19 @@ tr.mine td{background:#fff7ed}
 .tabs button.on{background:var(--ink);color:#fff}
 .flip{font-size:11px;padding:1px 6px}
 .hidden{display:none}
+#cfg:not(.hidden){display:flex}
+.tabs button i{font-style:normal;font-size:10px;min-width:15px;padding:0 4px;border-radius:99px;background:var(--chip);color:var(--muted);margin-left:2px}
+.tabs button i:empty{display:none}
+.tabs button i.hot{background:var(--accent);color:#fff}
+@keyframes flash{from{background:#fde68a}to{background:transparent}}
+.flash{animation:flash 1.6s ease-out}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:3px 10px;font-size:12.5px;margin:4px 0}
+.kv dt{color:var(--muted)}.kv dd{margin:0}
+.chips2{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0}
+.chip{font-size:12px;padding:2px 9px;border-radius:99px;background:#fff7ed;border:1px solid #fed7aa}
+.chip.none{background:var(--chip);border-color:var(--line);color:var(--muted)}
+.hist{font-size:12px;color:var(--muted);border-left:2px solid var(--line);padding-left:8px;margin:4px 0}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}}
 textarea{width:100%;font:inherit;font-size:12px}
 @media (max-width:1000px){main{grid-template-columns:1fr;overflow:auto}section{min-height:420px}}
 </style>
@@ -80,7 +93,7 @@ textarea{width:100%;font:inherit;font-size:12px}
   <button id="newcall">New call</button>
   <button id="reset">Reset data</button>
 </header>
-<div id="cfg" class="hidden" style="padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px">
+<div id="cfg" class="hidden" style="padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;gap:8px;align-items:center;font-size:12px">
   <label><input type="radio" name="be" value="gw" checked> Abridge gateway</label>
   <label><input type="radio" name="be" value="an"> Anthropic API key</label>
   <span id="gwf" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -113,10 +126,11 @@ textarea{width:100%;font:inherit;font-size:12px}
   <section>
     <h2>Staff desk
       <span class="tabs" id="stabs">
-        <button data-t="requests" class="on">Requests</button>
-        <button data-t="slots">Available Times</button>
-        <button data-t="sms">SMS</button>
-        <button data-t="learn">Learning</button>
+        <button data-t="requests" class="on">Requests <i id="b-requests"></i></button>
+        <button data-t="patient">Patient <i id="b-patient"></i></button>
+        <button data-t="slots">Available Times <i id="b-slots"></i></button>
+        <button data-t="sms">SMS <i id="b-sms"></i></button>
+        <button data-t="learn">Learning <i id="b-learn"></i></button>
       </span></h2>
     <div class="scroll" id="staff"></div>
   </section>
@@ -182,7 +196,7 @@ $('#newcall').onclick = () => { sid = 'call-' + Date.now().toString(36); traceLe
 $('#reset').onclick = async () => { if(!confirm('Reset all slots, requests and calls to seed data?'))return; await api('/api/reset', {}); traceLen=0; $('#trace').innerHTML=''; sid='call-'+Date.now().toString(36); poll(); };
 $('#dry').onchange = e => api('/api/dry_run', {on: e.target.checked});
 $('#showprompt').onclick = e => { $('#prompt').classList.toggle('hidden'); $('#trace').classList.toggle('hidden'); e.target.classList.toggle('on'); };
-$('#stabs').onclick = e => { const t=e.target.dataset.t; if(!t)return; tab=t; document.querySelectorAll('#stabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); renderStaff(); };
+$('#stabs').onclick = e => { const t=e.target.dataset.t; if(!t)return; tab=t; document.querySelectorAll('#stabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); const bd=$('#b-'+t); if(bd) bd.classList.remove('hot'); renderStaff(true); };
 
 // Model settings panel.
 $('#backend').onclick = () => $('#cfg').classList.toggle('hidden');
@@ -260,17 +274,58 @@ function traceItem(t){
   return '';
 }
 
-function renderStaff(){
+const PREF_LABELS = {time_of_day:'Time of day', days_of_week:'Days', location:'Location', provider:'Provider'};
+function prefChips(p){
+  if (!p) return '<span class="chip none">none saved</span>';
+  const out = Object.entries(PREF_LABELS).map(([k,l])=>{
+    const v = p[k]; if (v==null || v==='' || (Array.isArray(v)&&!v.length)) return '';
+    return `<span class="chip" title="${l}">${esc(Array.isArray(v)?v.join(', '):v)}</span>`;
+  }).join('');
+  return out || '<span class="chip none">no structured fields</span>';
+}
+function patientCard(p){
+  const ref = p.referral, b = p.booking, ls = p.last_search;
+  const st = {New:'',Booked:'ok',Waiting:'warn'}[p.status] ?? '';
+  return `<div class="card" data-k="pt-${esc(p.id)}">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(p.name)}</b><span class="pill">${esc(p.request)}</span><span class="pill ${st}">${esc(p.status)}</span>
+      ${p.verified_calls.length?`<span class="pill ok">verified on ${p.verified_calls.length} call${p.verified_calls.length>1?'s':''}</span>`:''}</div>
+    <dl class="kv"><dt>DOB</dt><dd>${esc(p.dob_masked)}</dd><dt>Phone</dt><dd>${esc(p.phone_masked)}</dd>
+      ${b?`<dt>Booked</dt><dd><b>${esc(b.when)}</b> · ${esc(b.provider)} · ${esc(b.location)}</dd>`:''}</dl>
+    <div class="sub-h">Saved preferences</div>
+    <div class="chips2">${prefChips(p.preferences)}</div>
+    ${p.preferences&&p.preferences.notes?`<div style="font-size:12.5px">“${esc(p.preferences.notes)}”</div>`:''}
+    ${!p.preferences?`<div class="sub" style="color:var(--muted)">The agent saves these with <code>save_patient_preferences</code> after a booking, then asks "still true?" on the next call.</div>`:''}
+    <div class="sub-h">How the agent used them</div>
+    ${ls?`<div style="font-size:12.5px">Last search (${esc(ls.at)}): <b>${esc(ls.visit_type)}</b> · ${esc(ls.location)} · ${esc(ls.time_of_day)} · ${esc((ls.days&&ls.days.length)?ls.days.join(', '):'any day')} · ${esc(ls.provider)}<br>
+      ${ls.results} matching slot${ls.results===1?'':'s'}${ls.top?`, top: ${esc(ls.top)}`:''}</div>`:'<div class="sub" style="color:var(--muted)">No search yet.</div>'}
+    <div class="sub" style="color:var(--muted);margin-top:4px">Preferences only rank slots. The referral, clinic policy and provider hard rules always win.</div>
+    ${p.preference_history.length?`<div class="sub-h">Preference history</div>`+p.preference_history.slice().reverse().map(h=>`<div class="hist">${esc(h.at)} · ${h.changed?'<b>changed</b>':'saved'} on ${esc(h.call)}<div class="chips2">${prefChips(h.preferences)}</div></div>`).join(''):''}
+    ${ref?`<div class="sub-h">Referral</div><dl class="kv"><dt>From</dt><dd>${esc(ref.referring)} · ${esc(ref.date)}</dd>
+      <dt>Covers</dt><dd>${esc(ref.authorized_visit_types.join(', '))}</dd><dt>Valid</dt><dd>${esc(ref.valid_from)} to ${esc(ref.valid_to)}</dd>
+      <dt>Evaluation</dt><dd>${ref.completed_evaluation?'completed':'not yet, so follow-ups are blocked'}</dd>${ref.note?`<dt>Note</dt><dd>${esc(ref.note)}</dd>`:''}</dl>`:''}
+  </div>`;
+}
+
+let staffKey = '', cardSigs = {};
+function renderStaff(force){
   if (!S) return;
+  // Redraw only when what this tab shows has changed, so clicks, scroll and focus survive polling.
+  const view = {requests:[S.requests,S.slots.filter(x=>x.booked_for)], patient:[S.patients], slots:[S.slots,slotFilter], sms:[S.outbox], learn:[S.provider_prefs,S.corrections,S.candidate_rules]}[tab];
+  const key = tab + JSON.stringify(view);
+  if (!force && key === staffKey) return;
+  const sameTab = staffKey.startsWith(tab);
+  staffKey = key;
   const el = $('#staff'); let h = '';
-  if (tab==='requests'){
+  if (tab==='patient'){
+    h += S.patients.map(patientCard).join('') || '<div style="color:var(--muted)">No patients.</div>';
+  } else if (tab==='requests'){
     h += S.requests.map(r=>{
       const sl = S.slots.find(x=>x.id===r.selected_slot);
       const st = {New:'',Booked:'ok',Waiting:'warn'}[r.status] ?? '';
       const rev = r.status==='Booked' && r.review==='pending' ? `<div style="margin-top:6px;display:flex;gap:6px">
           <button onclick="review('${r.id}','approved')">Approve</button>
           <button onclick="correct('${r.id}')">Correct…</button></div>` : r.review && r.review!=='pending' ? `<span class="pill">${r.review}</span>` : '';
-      return `<div class="card"><div style="display:flex;gap:8px;align-items:center"><b>${esc(r.id)} · ${esc(r.patient_name)}</b><span class="pill ${st}">${esc(r.status)}</span></div>
+      return `<div class="card" data-k="rq-${esc(r.id)}"><div style="display:flex;gap:8px;align-items:center"><b>${esc(r.id)} · ${esc(r.patient_name)}</b><span class="pill ${st}">${esc(r.status)}</span></div>
         <div>${esc(r.need)}</div>
         ${sl?`<div>Selected slot: <b>${esc(sl.id)}</b> ${esc(sl.label)} · ${esc(sl.provider)} · ${esc(sl.location)}</div>`:''}
         ${r.preferred_times?`<div>Preferred: ${esc(r.preferred_times)}</div>`:''}
@@ -282,11 +337,11 @@ function renderStaff(){
       <div class="sub" style="color:var(--muted);margin-bottom:6px">Slot race: after the agent offers a slot, click <b>Flip</b> on it before the caller accepts.</div>`;
     const rows = S.slots.filter(s=> slotFilter==='all' || (s.visit_type==='PT Evaluation' && (s.status==='Available' || s.booked_for)));
     h += `<table><tr><th>ID</th><th>When</th><th>Provider</th><th>Loc</th><th>Type</th><th>Status</th><th></th></tr>` +
-      rows.map(s=>`<tr class="${s.booked_for?'mine':''}"><td>${s.id}</td><td>${esc(s.label)}</td><td>${esc(s.provider.replace(', PT',''))}</td><td>${s.location}</td><td>${s.visit_type.replace('PT ','')}</td>
+      rows.map(s=>`<tr data-k="sl-${s.id}" class="${s.booked_for?'mine':''}"><td>${s.id}</td><td>${esc(s.label)}</td><td>${esc(s.provider.replace(', PT',''))}</td><td>${s.location}</td><td>${s.visit_type.replace('PT ','')}</td>
         <td><span class="pill ${s.status==='Available'?'ok':''}">${s.status}</span>${s.booked_for?' <span class="pill warn">Riley</span>':''}</td>
         <td><button class="flip" onclick="flip('${s.id}')">Flip</button></td></tr>`).join('') + `</table>`;
   } else if (tab==='sms'){
-    h += S.outbox.length ? S.outbox.slice().reverse().map(m=>`<div class="sms"><div class="sub" style="color:var(--muted)">to ${esc(m.to)} · ${esc(m.at)}${m.dry_run?' · dry run':''}</div>${esc(m.body)}</div>`).join('') : '<div style="color:var(--muted)">No messages sent yet.</div>';
+    h += S.outbox.length ? S.outbox.slice().reverse().map((m,i)=>`<div class="sms" data-k="sms-${S.outbox.length-i}"><div class="sub" style="color:var(--muted)">to ${esc(m.to)} · ${esc(m.at)}${m.dry_run?' · dry run':''}</div>${esc(m.body)}</div>`).join('') : '<div style="color:var(--muted)">No messages sent yet.</div>';
   } else {
     h += `<div class="sub-h">Provider rules</div>` + Object.entries(S.provider_prefs).map(([p,v])=>`<div class="card"><b>${esc(p)}</b>
         <div><span class="pill bad">hard</span> ${v.hard.map(esc).join(' · ')}</div>
@@ -297,6 +352,33 @@ function renderStaff(){
     if (S.candidate_rules.length) h += `<div class="sub-h">Candidate rules (need approval)</div>` + S.candidate_rules.map((c,i)=>`<div class="card"><b>${esc(c.provider)}</b>: ${esc(c.rule)} <button onclick="approve(${i})">Approve</button></div>`).join('');
   }
   const top = el.scrollTop; el.innerHTML = h; el.scrollTop = top;
+  // Flash items that are new or changed since the last draw of this tab.
+  const sigs = {};
+  el.querySelectorAll('[data-k]').forEach(n => {
+    const k = n.dataset.k, sig = n.innerHTML; sigs[k] = sig;
+    if (sameTab && cardSigs[k] !== sig) n.classList.add('flash');
+  });
+  cardSigs = sigs;
+}
+
+// Live counts on the staff tabs, so changes on other tabs are visible too.
+let lastBadges = {};
+function renderBadges(){
+  const waiting = S.requests.filter(r=>r.status==='Waiting').length;
+  const review = S.requests.filter(r=>r.review==='pending').length;
+  const p = S.patients[0];
+  const b = {
+    requests: waiting ? waiting+' waiting' : (review ? review+' to review' : ''),
+    patient: p && p.preferences ? 'prefs' : '',
+    slots: String(S.slots.filter(s=>s.status==='Available').length),
+    sms: S.outbox.length ? String(S.outbox.length) : '',
+    learn: S.candidate_rules.length ? S.candidate_rules.length+' new' : (S.corrections.length ? String(S.corrections.length) : ''),
+  };
+  for (const [k,v] of Object.entries(b)) {
+    const n = $('#b-'+k); if (!n) continue;
+    if (n.textContent !== v) { n.textContent = v; n.classList.toggle('hot', !!v && lastBadges[k] !== undefined && k !== tab && k !== 'slots'); }
+  }
+  lastBadges = b;
 }
 async function flip(id){ await api('/api/flip',{slot_id:id}); poll(); }
 async function review(id,v,c){ await api('/api/review',{request:id,verdict:v,correction:c||''}); poll(); }
@@ -305,7 +387,10 @@ async function propose(){ const r = await api('/api/propose_rules',{}); if (r.er
 async function approve(i){ await api('/api/approve_rule',{index:i}); poll(); }
 window.flip=flip; window.review=review; window.correct=correct; window.propose=propose; window.approve=approve;
 
+let polling = false;
 async function poll(){
+  if (polling) return;  // don't stack requests while the server is busy
+  polling = true;
   try {
     S = await api('/api/state?since=' + traceLen);
     const el = $('#trace'); const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
@@ -317,8 +402,8 @@ async function poll(){
     $('#backend').textContent = '⚙ ' + (S.backend || 'no model configured · click to set'); $('#backend').className = 'pill ' + (S.backend?'ok':'bad');
     $('#dry').checked = S.dry_run;
     $('#prompttext').textContent = S.system_prompt;
-    renderChat(); renderStaff();
-  } catch(e) {}
+    renderChat(); renderStaff(); renderBadges();
+  } catch(e) {} finally { polling = false; }
 }
 setInterval(poll, 1000); poll();
 </script>

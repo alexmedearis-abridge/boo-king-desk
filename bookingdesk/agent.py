@@ -295,6 +295,12 @@ class Desk:
         ranked.sort(key=lambda x: (-x[0], x[1]["start"]))
         if not ranked:
             self._fail(s, "search")
+        req = self._request_for(pid)
+        if req is not None:
+            # What the agent actually searched with this call, for the staff view.
+            req["last_search"] = {"at": datetime.now().strftime("%H:%M:%S"), "call": s["id"], "visit_type": vt,
+                                  "location": loc, "time_of_day": tod, "days": days, "provider": prov or "any",
+                                  "results": len(ranked), "top": fmt_slot(ranked[0][1]) if ranked else None}
         return {
             "constraints_applied": {"visit_type": vt, "location": loc, "time_of_day": tod, "days": days or "any", "provider": prov or "any"},
             "hard_filtered_out": filtered_out,
@@ -367,8 +373,13 @@ class Desk:
 
     def t_save_patient_preferences(self, s, pid, a):
         req = self._request_for(pid)
+        prev = req["patient_preferences"]
         req["patient_preferences"] = a["preferences"]
-        req["preferred_times"] = ", ".join(str(v) for v in a["preferences"].values() if v)
+        req["preferred_times"] = ", ".join(", ".join(v) if isinstance(v, list) else str(v)
+                                           for k, v in a["preferences"].items() if v and k != "notes")
+        req.setdefault("preference_history", []).append({
+            "at": datetime.now().strftime("%H:%M:%S"), "call": s["id"],
+            "preferences": a["preferences"], "changed": prev is not None and prev != a["preferences"]})
         return {"ok": True, "saved_to": f"Patient Requests {req['id']}"}
 
     def t_escalate(self, s, pid, a):
@@ -503,5 +514,30 @@ class Desk:
                 "trace_len": len(self.trace),
                 "sessions": {k: {"transcript": v["transcript"], "verified": bool(v["verified"]), "busy": v["busy"]}
                              for k, v in self.sessions.items()},
+                "patients": self._patient_views(),
                 "system_prompt": self.system_prompt(),
             }
+
+    def _patient_views(self):
+        """Staff-facing patient summary. DOB and phone are masked on screen."""
+        out = []
+        for p in self.db["patients"]:
+            req = self._request_for(p["id"])
+            if not req:
+                continue
+            ref = self.db["referrals"].get(p["id"])
+            cur = self._slot(req["selected_slot"]) if req["selected_slot"] else None
+            calls = sorted({sid for sid, s in self.sessions.items() if s["verified"] == p["id"]})
+            out.append({
+                "id": p["id"], "request": req["id"], "name": f"{p['name'][0]['given'][0]} {p['name'][0]['family']}",
+                "dob_masked": "••/••/" + p["birthDate"][:4], "phone_masked": "•••-•••-" + p["telecom"][0]["value"][-4:],
+                "status": req["status"], "review": req["review"],
+                "referral": ({k: ref[k] for k in ("type", "date", "authorized_visit_types", "valid_from", "valid_to", "completed_evaluation")}
+                             | {"referring": next((l.split(": ", 1)[1] for l in ref["text"].splitlines() if l.startswith("Referring")), ""),
+                                "note": next((l.split(": ", 1)[1] for l in ref["text"].splitlines() if l.startswith("Notes")), "")}) if ref else None,
+                "preferences": req["patient_preferences"], "preference_history": req.get("preference_history", []),
+                "last_search": req.get("last_search"),
+                "booking": {"slot": cur["id"], "when": fmt_slot(cur), "provider": cur["provider"], "location": cur["location"]} if cur else None,
+                "verified_calls": calls,
+            })
+        return out
