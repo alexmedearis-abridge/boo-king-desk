@@ -64,12 +64,17 @@ textarea{width:100%;font:inherit;font-size:12px}
   <label class="sub"><input type="checkbox" id="dry"> dry run</label>
   <label class="sub"><input type="checkbox" id="speak"> speak replies</label>
   <select id="voice" class="sub" title="Voice for spoken replies">
-    <option value="coral" selected>Coral (natural)</option>
-    <option value="sage">Sage (natural)</option>
-    <option value="nova">Nova (natural)</option>
-    <option value="shimmer">Shimmer (natural)</option>
-    <option value="ash">Ash (natural)</option>
-    <option value="ballad">Ballad (natural)</option>
+    <optgroup label="Fast · streams">
+      <option value="tts:gpt-4o-mini-tts-2025-12-15:marin" selected>Marin</option>
+      <option value="tts:gpt-4o-mini-tts-2025-12-15:cedar">Cedar</option>
+      <option value="tts:gpt-4o-mini-tts-2025-12-15:coral">Coral</option>
+      <option value="tts:gpt-4o-mini-tts-2025-12-15:sage">Sage</option>
+      <option value="tts:tts-1-hd:nova">Nova (HD)</option>
+    </optgroup>
+    <optgroup label="Most natural · slower">
+      <option value="audio:openai/gpt-audio-1.5:marin">Marin (gpt-audio)</option>
+      <option value="audio:openai/gpt-audio-1.5:cedar">Cedar (gpt-audio)</option>
+    </optgroup>
     <option value="browser">Browser voice (offline)</option>
   </select>
   <button id="newcall">New call</button>
@@ -156,16 +161,15 @@ let audioEl = null;
 async function speak(text){
   const v = $('#voice').value;
   if (v !== 'browser') {
-    try {
-      const res = await fetch('/api/tts', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({text, voice: v})});
-      if (res.ok) {
-        if (audioEl) audioEl.pause();
-        audioEl = new Audio(URL.createObjectURL(await res.blob()));
-        await audioEl.play();
-        return;
-      }
-    } catch (e) {}
+    if (audioEl) { audioEl.pause(); audioEl.src = ''; }
+    // Streams: playback starts while the rest of the audio is still arriving.
+    audioEl = new Audio('/api/tts?' + new URLSearchParams({text, voice: v}));
+    try { await audioEl.play(); return; }
+    catch (e) { console.warn('Gateway voice failed, using browser voice', e); }
   }
+  browserSpeak(text);
+}
+function browserSpeak(text){
   if (!('speechSynthesis' in window)) return;
   const u = new SpeechSynthesisUtterance(text);
   const voices = speechSynthesis.getVoices().filter(x => x.lang.startsWith('en'));
@@ -213,7 +217,7 @@ function sendWhenFree(){ if (sending) return setTimeout(sendWhenFree, 300); send
 if (SR) {
   $('#mic').onclick = () => {
     if (rec) { rec.stop(); return; }  // second press stops listening
-    if (audioEl) audioEl.pause();
+    if (audioEl) { audioEl.pause(); audioEl.src = ''; }
     if ('speechSynthesis' in window) speechSynthesis.cancel();  // don't transcribe our own voice
     rec = new SR(); rec.lang = 'en-US'; rec.interimResults = true;
     rec.onresult = e => {

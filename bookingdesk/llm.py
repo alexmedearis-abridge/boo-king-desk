@@ -94,20 +94,45 @@ def list_models():
         return sorted(m["id"] for m in json.loads(r.read()).get("data", []))
 
 
-def tts(text, voice="coral"):
-    """Speech for the caller's side, via the gateway's OpenAI-style /audio/speech. Returns mp3 bytes."""
-    body = {
-        "model": os.environ.get("TTS_MODEL", "gpt-4o-mini-tts"),
-        "voice": voice,
-        "input": text,
-        "instructions": "Warm, relaxed front-desk receptionist at a physical therapy clinic, on a phone call. Natural pace, friendly.",
-        "response_format": "mp3",
-    }
-    req = urllib.request.Request(
-        os.environ["LLM_BASE_URL"].rstrip("/") + "/audio/speech", data=json.dumps(body).encode(),
-        headers={"content-type": "application/json", **_gateway_headers()})
+VOICE_STYLE = ("Warm, relaxed front-desk receptionist at a physical therapy clinic, on a phone call. "
+               "Natural pace, friendly, a light smile in the voice.")
+DEFAULT_VOICE = "tts:gpt-4o-mini-tts-2025-12-15:marin"
+
+
+def speakable(text):
+    """Turn a chat reply into something that reads well aloud."""
+    import re
+    t = re.sub(r"[*_`#]+", "", text)                  # markdown
+    t = re.sub(r"([^.!?:,])[ \t]*\n\s*\n", r"\1. ", t)  # paragraph break = sentence end
+    t = re.sub(r"\s*\n\s*", " ", t)
+    t = re.sub(r"\bPT\b", "P.T.", t)
+    return re.sub(r"\.\s*\.", ".", t).strip()
+
+
+def tts_stream(text, voice=DEFAULT_VOICE):
+    """Yield mp3 chunks for a reply. `voice` is "<engine>:<model>:<voice>":
+    tts   -> /audio/speech, streamed as it is generated
+    audio -> gpt-audio via /chat/completions (more natural, slower, returned whole)"""
+    engine, model, name = (voice or DEFAULT_VOICE).split(":", 2)
+    text = speakable(text)
+    base = os.environ["LLM_BASE_URL"].rstrip("/")
+    headers = {"content-type": "application/json", **_gateway_headers()}
+    if engine == "audio":
+        import base64
+        body = {"model": model, "modalities": ["text", "audio"], "audio": {"voice": name, "format": "mp3"},
+                "messages": [{"role": "system", "content": VOICE_STYLE + " Read the user's text aloud exactly as written, word for word. Do not add or change anything."},
+                             {"role": "user", "content": text}]}
+        r = _post(base + "/chat/completions", body, headers)
+        yield base64.b64decode(r["choices"][0]["message"]["audio"]["data"])
+        return
+    body = {"model": model, "voice": name, "input": text, "instructions": VOICE_STYLE, "response_format": "mp3"}
+    req = urllib.request.Request(base + "/audio/speech", data=json.dumps(body).encode(), headers=headers)
     with urllib.request.urlopen(req, timeout=60) as r:
-        return r.read()
+        while True:
+            chunk = r.read(8192)
+            if not chunk:
+                break
+            yield chunk
 
 
 def _openai(system, history, tools):

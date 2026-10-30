@@ -28,6 +28,25 @@ class H(BaseHTTPRequestHandler):
         n = int(self.headers.get("content-length") or 0)
         return json.loads(self.rfile.read(n) or b"{}")
 
+    def _tts(self, text, voice):
+        from llm import tts_stream
+        if not os.environ.get("LLM_BASE_URL"):
+            return self._json({"error": "Voice needs the gateway (LLM_BASE_URL)."}, 400)
+        try:
+            chunks = tts_stream(text, voice)
+            first = next(chunks)  # fail before sending headers if the gateway errors
+        except Exception as e:
+            return self._json({"error": f"{type(e).__name__}: {e}"}, 502)
+        self.send_response(200)
+        self.send_header("content-type", "audio/mpeg")
+        self.end_headers()  # HTTP/1.0: no length, the body ends when we close
+        try:
+            self.wfile.write(first)
+            for c in chunks:
+                self.wfile.write(c)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # caller started speaking and we stopped playback
+
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             b = open(os.path.join(HERE, "index.html"), "rb").read()
@@ -35,6 +54,11 @@ class H(BaseHTTPRequestHandler):
             self.send_header("content-type", "text/html; charset=utf-8")
             self.end_headers()
             self.wfile.write(b)
+        elif self.path.startswith("/api/tts?"):
+            # GET so an <audio> element can start playing while the mp3 is still streaming in.
+            from urllib.parse import parse_qs, urlparse
+            q = parse_qs(urlparse(self.path).query)
+            self._tts(q.get("text", [""])[0], q.get("voice", [None])[0])
         elif self.path.startswith("/api/state"):
             since = int(self.path.split("since=")[1]) if "since=" in self.path else 0
             self._json(DESK.state(since))
@@ -63,18 +87,7 @@ class H(BaseHTTPRequestHandler):
             except Exception as e:
                 self._json({"error": f"{type(e).__name__}: {e}. On VNet/Teleport?"}, 502)
         elif p == "/api/tts":
-            from llm import tts
-            if not os.environ.get("LLM_BASE_URL"):
-                return self._json({"error": "TTS needs the gateway (LLM_BASE_URL)."}, 400)
-            try:
-                audio = tts(b["text"], b.get("voice") or "coral")
-            except Exception as e:
-                return self._json({"error": f"{type(e).__name__}: {e}"}, 502)
-            self.send_response(200)
-            self.send_header("content-type", "audio/mpeg")
-            self.send_header("content-length", str(len(audio)))
-            self.end_headers()
-            self.wfile.write(audio)
+            self._tts(b.get("text", ""), b.get("voice"))
         elif p == "/api/reset":
             DESK.reset()
             self._json({"ok": True})
