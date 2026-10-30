@@ -43,12 +43,12 @@ class H(BaseHTTPRequestHandler):
         n = int(self.headers.get("content-length") or 0)
         return json.loads(self.rfile.read(n) or b"{}")
 
-    def _tts(self, text, voice):
-        from llm import tts_stream
+    def _tts(self, text, voice, pace=None):
+        from llm import PACE, tts_stream
         if not os.environ.get("LLM_BASE_URL"):
             return self._json({"error": "Voice needs the gateway (LLM_BASE_URL)."}, 400)
         try:
-            chunks = tts_stream(text, voice)
+            chunks = tts_stream(text, voice, pace if pace in PACE else None)
             first = next(chunks)  # fail before sending headers if the gateway errors
         except Exception as e:
             return self._json({"error": f"{type(e).__name__}: {e}"}, 502)
@@ -74,7 +74,7 @@ class H(BaseHTTPRequestHandler):
             # GET so an <audio> element can start playing while the mp3 is still streaming in.
             from urllib.parse import parse_qs, urlparse
             q = parse_qs(urlparse(self.path).query)
-            self._tts(q.get("text", [""])[0], q.get("voice", [None])[0])
+            self._tts(q.get("text", [""])[0], q.get("voice", [None])[0], q.get("pace", [None])[0])
         elif self.path == "/api/evals/latest":
             # Read-only. Reports hold ids and scrubbed text only (no names, DOBs or phones).
             try:
@@ -121,7 +121,7 @@ class H(BaseHTTPRequestHandler):
             except Exception as e:
                 self._json({"error": f"{type(e).__name__}: {e}. On VNet/Teleport?"}, 502)
         elif p == "/api/tts":
-            self._tts(b.get("text", ""), b.get("voice"))
+            self._tts(b.get("text", ""), b.get("voice"), b.get("pace"))
         elif p == "/api/reset":
             DESK.reset()
             self._json({"ok": True})

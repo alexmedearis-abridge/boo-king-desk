@@ -54,6 +54,11 @@
   "reschedule_existing__voice_asr": "acceptance",
   "slot_race__chat_native": "calibration",
   "slot_race__voice_asr": "dev",
+  "voice_request__chat_native": "dev",
+  "voice_request__voice_asr": "acceptance",
+  "voice_request__voice_older": "calibration",
+  "voice_request_unverified__chat_native": "dev",
+  "voice_request_unverified__voice_asr": "acceptance",
   "wrong_dob__chat_native": "acceptance",
   "wrong_dob__chat_nonnative": "dev",
   "wrong_dob__voice_asr": "dev"

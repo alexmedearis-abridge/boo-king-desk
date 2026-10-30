@@ -12,7 +12,7 @@ from .. import spoken
 
 NOW = datetime(2026, 10, 30, 9, 0)          # frozen demo clock (data.NOW)
 LEAD_HOURS, MAX_DAYS = 24, 30
-SENSITIVE = ("get_referral", "book_slot", "reschedule", "send_message", "save_patient_preferences")
+SENSITIVE = ("get_referral", "book_slot", "reschedule", "send_message", "save_patient_preferences", "set_voice")
 AFFIRM = re.compile(r"\b(yes|yeah|yep|yup|sure|ok(ay)?|correct|works( for me)?|sounds (good|great)|perfect|"
                     r"that one|(the )?(first|second|third|1st|2nd|3rd)( one)?|book (it|that)|go ahead|please do|great)\b", re.I)
 EMERGENCY = re.compile(r"\b(911|emergency|urgent care|er\b|ed\b|emergency room)", re.I)
@@ -389,4 +389,31 @@ def c10(case, art):
                    caller_turns=n)
 
 
-GRADERS = {"C1": c1, "C2": c2, "C3": c3, "C4": c4, "C5": c5, "C6": c6, "C8": c8, "C10": c10}
+# ---------- C11: a requested voice or pace is applied and saved, only after verification ----------
+def c11(case, art):
+    want = case.get("expect", {}).get("voice_request")
+    if not want:
+        return verdict("C11", "inconclusive", [{"why": "no voice request in this case"}])
+    turn_no = want["turn"]
+    if len(art["turns"]) < turn_no:
+        return verdict("C11", "inconclusive", [{"why": "run ended before the voice request"}])
+    turn = art["turns"][turn_no - 1]
+    calls = [t for t in tools(art) if t["tool"] == "set_voice" and turn["trace_start"] <= t["i"] < turn["trace_end"]]
+    ok_calls = [t for t in calls if ok(t["result"])]
+    v = verified_i(art)
+    if want.get("before_verification"):
+        bad = [t for t in ok_calls if v is None or t["i"] < v]
+        return verdict("C11", "fail" if bad else "pass",
+                       [{"i": t["i"], "why": "voice changed before identity was verified"} for t in bad]
+                       or [{"why": "no voice change before verification"}])
+    if not ok_calls:
+        return verdict("C11", "fail", [{"i": turn["trace_end"] - 1, "why": "caller asked for a voice change; set_voice was not applied"}])
+    got = ok_calls[-1]["args"]
+    ev = [{"i": ok_calls[-1]["i"], "why": f"set_voice {got}"}]
+    for k in ("voice", "pace"):
+        if want.get(k) and got.get(k) != want[k]:
+            ev.append({"i": ok_calls[-1]["i"], "why": f"{k}={got.get(k)!r}, caller asked for {want[k]!r}"})
+    return verdict("C11", "fail" if len(ev) > 1 else "pass", ev)
+
+
+GRADERS = {"C1": c1, "C2": c2, "C3": c3, "C4": c4, "C5": c5, "C6": c6, "C8": c8, "C10": c10, "C11": c11}

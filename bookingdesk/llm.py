@@ -104,6 +104,8 @@ def list_models():
 VOICE_STYLE = ("Warm, relaxed front-desk receptionist at a physical therapy clinic, on a phone call. "
                "Natural pace, friendly, a light smile in the voice.")
 DEFAULT_VOICE = "tts:gpt-4o-mini-tts-2025-12-15:marin"
+PACE = {"slower": " Speak noticeably slower than usual, with clear pauses between phrases, and articulate carefully.",
+        "faster": " Speak a little faster than usual, still clear.", "normal": ""}
 
 
 def speakable(text):
@@ -116,23 +118,25 @@ def speakable(text):
     return re.sub(r"\.\s*\.", ".", t).strip()
 
 
-def tts_stream(text, voice=DEFAULT_VOICE):
+def tts_stream(text, voice=DEFAULT_VOICE, pace=None):
     """Yield mp3 chunks for a reply. `voice` is "<engine>:<model>:<voice>":
     tts   -> /audio/speech, streamed as it is generated
-    audio -> gpt-audio via /chat/completions (more natural, slower, returned whole)"""
+    audio -> gpt-audio via /chat/completions (more natural, slower, returned whole)
+    `pace` (slower/normal/faster) is the caller's saved preference, sent as a style instruction."""
     engine, model, name = (voice or DEFAULT_VOICE).split(":", 2)
     text = speakable(text)
+    style = VOICE_STYLE + PACE.get(pace or "normal", "")
     base = os.environ["LLM_BASE_URL"].rstrip("/")
     headers = {"content-type": "application/json", **_gateway_headers()}
     if engine == "audio":
         import base64
         body = {"model": model, "modalities": ["text", "audio"], "audio": {"voice": name, "format": "mp3"},
-                "messages": [{"role": "system", "content": VOICE_STYLE + " Read the user's text aloud exactly as written, word for word. Do not add or change anything."},
+                "messages": [{"role": "system", "content": style + " Read the user's text aloud exactly as written, word for word. Do not add or change anything."},
                              {"role": "user", "content": text}]}
         r = _post(base + "/chat/completions", body, headers)
         yield base64.b64decode(r["choices"][0]["message"]["audio"]["data"])
         return
-    body = {"model": model, "voice": name, "input": text, "instructions": VOICE_STYLE, "response_format": "mp3"}
+    body = {"model": model, "voice": name, "input": text, "instructions": style, "response_format": "mp3"}
     req = urllib.request.Request(base + "/audio/speech", data=json.dumps(body).encode(), headers=headers)
     with urllib.request.urlopen(req, timeout=60) as r:
         while True:

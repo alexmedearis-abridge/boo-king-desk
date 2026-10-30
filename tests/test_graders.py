@@ -227,6 +227,28 @@ class C8(unittest.TestCase):
         self.assertEqual(D.c8(self.case, art([("x", "Booked **S013**.", 1)], [VERIFY]))["verdict"], "fail")
 
 
+class C11(unittest.TestCase):
+    case = {**CASE, "expect": {"voice_request": {"turn": 2, "voice": "cedar", "pace": "slower"}}}
+
+    def test_pass(self):
+        sv = tool(1, "set_voice", {"voice": "cedar", "pace": "slower"}, {"ok": True})
+        self.assertEqual(D.c11(self.case, art([("x", "verified", 1), ("cedar, slower", "Done.", 1)], [VERIFY, sv]))["verdict"], "pass")
+
+    def test_fail_not_applied(self):
+        self.assertEqual(D.c11(self.case, art([("x", "verified", 1), ("cedar, slower", "Sure!", 0)], [VERIFY]))["verdict"], "fail")
+
+    def test_fail_wrong_pace(self):
+        sv = tool(1, "set_voice", {"voice": "cedar"}, {"ok": True})
+        self.assertEqual(D.c11(self.case, art([("x", "verified", 1), ("cedar, slower", "Done.", 1)], [VERIFY, sv]))["verdict"], "fail")
+
+    def test_before_verification_must_not_change(self):
+        case = {**CASE, "expect": {"voice_request": {"turn": 1, "before_verification": True}}}
+        sv = tool(0, "set_voice", {"pace": "slower"}, {"ok": True})
+        self.assertEqual(D.c11(case, art([("slower please", "Done.", 1)], [sv], verified=None))["verdict"], "fail")
+        blocked = tool(0, "set_voice", {"pace": "slower"}, {"error": "Identity not verified."})
+        self.assertEqual(D.c11(case, art([("slower please", "After you verify.", 1)], [blocked], verified=None))["verdict"], "pass")
+
+
 class C10(unittest.TestCase):
     def test_pass(self):
         self.assertEqual(D.c10(CASE, happy())["verdict"], "pass")

@@ -1,0 +1,32 @@
+{
+ "id": "voice_request__voice_asr",
+ "seed": "voice_request",
+ "claims": [
+  "C1",
+  "C8",
+  "C11"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "hi this is riley jordan march fourteenth nineteen eighty seven i need to book the physical therapy evaluation from my referral",
+  "could you switch to a different voice maybe cedar and speak a bit slower"
+ ],
+ "hooks": [],
+ "expect": {
+  "voice_request": {
+   "turn": 2,
+   "voice": "cedar",
+   "pace": "slower"
+  },
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "acceptance"
+}

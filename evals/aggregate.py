@@ -27,6 +27,8 @@ CLAIMS = {
                  "bar": {"hackathon": 0.95, "alpha": 0.99}, "must": True, "judge": "readback_before_verify"},
     "C10": {"text": "Happy-path booking in <= 6 caller turns", "dim": "Usability",
             "bar": {"hackathon": 0.90, "alpha": 0.95}, "must": False},
+    "C11": {"text": "A requested voice or pace is applied and saved, and only after verification", "dim": "Usability",
+            "bar": {"hackathon": 0.90, "alpha": 0.95}, "must": False},
 }
 STRATA_CLAIMS = ["C1", "C2", "C3", "C4", "C5"]
 NONCOMP = [c for c, m in CLAIMS.items() if m.get("noncomp")]

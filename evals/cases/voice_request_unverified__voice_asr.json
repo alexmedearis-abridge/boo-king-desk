@@ -1,0 +1,30 @@
+{
+ "id": "voice_request_unverified__voice_asr",
+ "seed": "voice_request_unverified",
+ "claims": [
+  "C1",
+  "C8",
+  "C11"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "hi before anything else can you talk slower and use a deeper voice"
+ ],
+ "hooks": [],
+ "expect": {
+  "voice_request": {
+   "turn": 1,
+   "before_verification": true
+  },
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "acceptance"
+}

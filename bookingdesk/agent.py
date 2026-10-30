@@ -53,7 +53,14 @@ Safety
 - Only share chart content needed for booking (visit type, referring provider). Never read back date of birth or phone number.
 - Policy and the referral always win over preferences.
 
+Voice and pace
+- If the caller asks for a different voice or a slower or faster pace, call set_voice and confirm in one short sentence. It is saved for their future calls. Don't offer it unprompted.
+- set_voice works only after identity is verified. If they ask before that, say you can change it as soon as they're verified.
+
 Style: short, warm, phone-call sentences. One question at a time. Times like "Tuesday Nov 3 at 9:30 AM"."""
+
+VOICES = ["marin", "cedar", "coral", "sage", "nova"]
+VOICE_DESC = "marin (warm, female), cedar (calm, male), coral (bright, female), sage (soft, neutral), nova (clear, female)"
 
 
 TOOLS = [
@@ -93,6 +100,11 @@ TOOLS = [
              "time_of_day": {"type": "string"}, "days_of_week": {"type": "array", "items": {"type": "string"}},
              "location": {"type": "string"}, "provider": {"type": "string"}, "notes": {"type": "string"}}},
          "reason": {"type": "string"}}, "required": ["preferences", "reason"]}},
+    {"name": "set_voice", "description": "Change the voice and/or speaking pace the caller hears, from this reply on, and save it to their profile for future calls. Only after identity is verified. Voices: " + VOICE_DESC + ".",
+     "parameters": {"type": "object", "properties": {
+         "voice": {"type": "string", "enum": VOICES, "description": "omit to keep the current voice"},
+         "pace": {"type": "string", "enum": ["slower", "normal", "faster"], "description": "omit to keep the current pace"},
+         "reason": {"type": "string"}}, "required": ["reason"]}},
     {"name": "escalate", "description": "Hand off to front-desk staff: sets the request to Waiting with a Next action and a call summary. Use for identity failure, clinical content, requests for a person, unresolved out-of-policy asks, or repeated failures.",
      "parameters": {"type": "object", "properties": {
          "category": {"type": "string", "enum": ["identity", "clinical", "human_requested", "out_of_policy", "repeated_failure", "other"]},
@@ -140,13 +152,14 @@ class Desk:
             self.sessions = {}
             self.trace = []
             self.dry_run = False
+            self.db["voice_prefs"] = {}  # patient id -> {"voice", "pace", "set_at", "call"}
 
     # ---------- session + trace ----------
     def session(self, sid):
         with self.lock:
             if sid not in self.sessions:
                 self.sessions[sid] = {"id": sid, "history": [], "transcript": [], "verified": None,
-                                      "failures": {}, "busy": False, "started": time.time()}
+                                      "failures": {}, "busy": False, "started": time.time(), "voice": {}}
             return self.sessions[sid]
 
     def log(self, sid, kind, **kw):
@@ -223,6 +236,8 @@ class Desk:
                 if s["verified"] and s["verified"] != p["id"]:
                     return {"error": "A different patient is already verified on this call. Identity is pinned."}
                 s["verified"] = p["id"]
+                saved = self.db["voice_prefs"].get(p["id"], {})  # saved choice applies from now on
+                s["voice"] = {k: saved[k] for k in ("voice", "pace") if k in saved}
                 return {"match": True, "patient_id": p["id"], "name": full.title(),
                         "note": "Verified with 2 identifiers. Patient ID pinned for this call."}
         n = self._fail(s, "identity")
@@ -385,6 +400,20 @@ class Desk:
             "preferences": a["preferences"], "changed": prev is not None and prev != a["preferences"]})
         return {"ok": True, "saved_to": f"Patient Requests {req['id']}"}
 
+    def t_set_voice(self, s, pid, a):
+        change = {k: a[k] for k in ("voice", "pace") if a.get(k)}
+        if not change:
+            return {"ok": False, "error": f"Name a voice ({', '.join(VOICES)}) or a pace (slower, normal, faster)."}
+        if a.get("voice") and a["voice"] not in VOICES:
+            return {"ok": False, "error": f"Unknown voice. Choose one of: {VOICE_DESC}."}
+        s["voice"] = {**s.get("voice", {}), **change}  # this call hears it right away
+        if self.dry_run:
+            return {"ok": True, "dry_run": True, "voice": s["voice"], "note": "Dry run: applied to this call, not saved."}
+        saved = {**self.db["voice_prefs"].get(pid, {}), **change,
+                 "set_at": datetime.now().strftime("%H:%M:%S"), "call": s["id"]}
+        self.db["voice_prefs"][pid] = saved
+        return {"ok": True, "voice": {k: saved[k] for k in ("voice", "pace") if k in saved}, "saved_for_future_calls": True}
+
     def t_escalate(self, s, pid, a):
         req = self._request_for(pid) if pid else None
         if req is None:
@@ -454,7 +483,7 @@ class Desk:
                 reply = "Let me get a team member to help you with this."
                 self.log(sid, "guardrail", rule="max_steps", detail=f"Stopped after {MAX_STEPS} steps.")
             s["transcript"].append({"who": "agent", "text": reply})
-            return {"reply": reply}
+            return {"reply": reply, "voice": s.get("voice") or None}
         except Exception as e:
             self.log(sid, "error", detail=str(e))
             return {"error": str(e)}
@@ -515,7 +544,8 @@ class Desk:
                 "corrections": self.db["corrections"],
                 "trace": self.trace[since:],
                 "trace_len": len(self.trace),
-                "sessions": {k: {"transcript": v["transcript"], "verified": bool(v["verified"]), "busy": v["busy"]}
+                "sessions": {k: {"transcript": v["transcript"], "verified": bool(v["verified"]), "busy": v["busy"],
+                                 "voice": v.get("voice") or None}
                              for k, v in self.sessions.items()},
                 "patients": self._patient_views(),
                 "system_prompt": self.system_prompt(),
@@ -544,5 +574,6 @@ class Desk:
                 "last_search": req.get("last_search"),
                 "booking": {"slot": cur["id"], "when": fmt_slot(cur), "provider": cur["provider"], "location": cur["location"]} if cur else None,
                 "verified_calls": calls,
+                "voice_pref": self.db["voice_prefs"].get(p["id"]),
             })
         return out

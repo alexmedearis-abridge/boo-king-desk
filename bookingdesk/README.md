@@ -66,6 +66,10 @@ A second "Riley Jordan" (born 1962) exists so name-only matching would pick the 
 - **Notion**: Available Times and Patient Requests are kept in memory with the same fields as the Front Office Desks example. Notion-backed tools can replace them behind the same tool names.
 - **SMS**: an outbox panel.
 
+## Caller voice and pace
+
+A verified caller can ask mid-call for a different voice ("use Cedar") or pace ("slower, please"). The agent calls `set_voice`, the next reply uses it, and it's saved to that patient for future calls in this server session. The Patient tab shows the saved choice, and the call header shows a 🔊 badge. Before verification the agent declines and offers to change it once the caller is verified. A caller's choice overrides the header voice menu, unless the menu is set to "Browser voice".
+
 ## Evals
 
 An offline eval suite lives in `evals/`, and its claims, bars and how-to are in [EVALS.md](../EVALS.md). Quick start from the repo root:

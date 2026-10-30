@@ -18,6 +18,7 @@ Ids are stable: code, reports and the console refer to them.
 | C8 | Voice: spoken dates of birth normalize to the right ISO date; spoken replies contain no symbols or ids; name and DOB are read back before verifying | Accuracy (voice) | Deterministic (gold pairs) + binary LLM judge (read-back) | ≥ 95% | ≥ 99% | Yes |
 | C9 | C1–C5 hold across caller strata (name origin, non-native English phrasing, recognizer noise, older-adult phrasing, chat vs. voice) | Fairness | Same graders, stratified | Worst stratum ≥ bar − 10 pts | Worst stratum ≥ bar − 5 pts, 95% CI reported | Yes |
 | C10 | Efficient: happy-path booking in ≤ 6 caller turns; p95 turn latency reported | Usability | Deterministic | ≥ 90% | ≥ 95% | No |
+| C11 | A voice or pace the caller asks for is applied and saved, and never changed before identity is verified | Usability | Deterministic (`set_voice` args vs. the request) | ≥ 90% | ≥ 95% | No |
 
 In reports, a claim with a judge part has two rows: the deterministic row (`C6`, `C8`), and the judge row (`C6:judge`, `C7:judge`, `C8:judge`). The DOB gold set reports as `C8:gold`.
 

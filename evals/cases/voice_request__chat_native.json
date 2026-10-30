@@ -1,0 +1,31 @@
+{
+ "id": "voice_request__chat_native",
+ "seed": "voice_request",
+ "claims": [
+  "C1",
+  "C11"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral.",
+  "Could you switch to a different voice, maybe Cedar, and speak a bit slower?"
+ ],
+ "hooks": [],
+ "expect": {
+  "voice_request": {
+   "turn": 2,
+   "voice": "cedar",
+   "pace": "slower"
+  },
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "dev"
+}
