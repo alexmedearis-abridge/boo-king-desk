@@ -74,11 +74,45 @@ tr.mine td{background:#fff7ed}
 @media (prefers-reduced-motion:reduce){.flash{animation:none}}
 textarea{width:100%;font:inherit;font-size:12px}
 @media (max-width:1000px){main{grid-template-columns:1fr;overflow:auto}section{min-height:420px}}
+
+/* ---------- Halloween theme (html.spooky; toggle with the 🎃 checkbox) ---------- */
+.spooky-only{display:none}
+html.spooky .spooky-only{display:inline}
+html.spooky{color-scheme:dark;--bg:#120e1a;--panel:#1c1626;--ink:#f2ebe0;--muted:#a898ba;--line:#352a43;--accent:#ff7a1a;
+  --ok:#5fd38a;--warn:#ffb347;--bad:#ff6b6b;--blue:#8ab4ff;--chip:#2a2136}
+html.spooky body{background:radial-gradient(circle at 94% -12%,rgba(255,214,150,.16),transparent 38%),var(--bg)}
+html.spooky header{position:relative;background:linear-gradient(90deg,#1f1430,#1c1626 60%);overflow:visible}
+html.spooky header h1{color:var(--accent);letter-spacing:.01em}
+html.spooky button:hover{border-color:var(--accent)}
+html.spooky button.primary{background:var(--accent);color:#1a0f05;border-color:var(--accent)}
+html.spooky input,html.spooky select{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:6px}
+html.spooky .pill.ok{background:rgba(95,211,138,.14)}html.spooky .pill.bad{background:rgba(255,107,107,.14)}html.spooky .pill.warn{background:rgba(255,179,71,.14)}
+html.spooky .msg.agent{background:#2b1a0f;border-color:#6e3b15}
+html.spooky .t pre{background:#15101d}
+html.spooky .t.patient{border-color:#7d6f8f}
+html.spooky .t.esc{background:rgba(255,179,71,.08)}html.spooky .t.guard{background:rgba(255,107,107,.08)}html.spooky .t.staff{background:rgba(138,180,255,.08)}
+html.spooky tr.mine td{background:rgba(255,122,26,.12)}
+html.spooky .chip{background:#2b1a0f;border-color:#6e3b15}
+html.spooky .sms{background:rgba(95,211,138,.1);border-color:rgba(95,211,138,.35)}
+html.spooky .tabs button.on,html.spooky .pickers button.on{background:var(--accent);color:#1a0f05;border-color:var(--accent)}
+html.spooky .tabs button i.hot{color:#1a0f05}
+html.spooky .flash{animation-name:flash-spooky}
+@keyframes flash-spooky{from{background:rgba(255,122,26,.35)}to{background:transparent}}
+/* a faint cobweb in the call panel's corner */
+html.spooky main>section:first-child{position:relative}
+html.spooky main>section:first-child::after{content:"";position:absolute;top:0;right:0;width:84px;height:84px;pointer-events:none;opacity:.5;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 84 84' fill='none' stroke='%23a898ba' stroke-width='.8'%3E%3Cpath d='M84 0L0 84M84 0L28 84M84 0L56 84M84 0L0 28M84 0L0 56'/%3E%3Cpath d='M84 18Q72 14 66 0M84 36Q62 30 48 0M84 56Q52 48 28 0M84 76Q42 66 8 0'/%3E%3C/svg%3E") no-repeat top right}
+/* a small spider on a thread, swinging from the header */
+.spider{position:absolute;right:30px;top:0;width:1px;height:46px;background:linear-gradient(#a898ba88,#a898ba33);transform-origin:top center;
+  animation:sway 4.5s ease-in-out infinite;z-index:5;pointer-events:none}
+.spider::after{content:"🕷️";position:absolute;bottom:-12px;left:-8px;font-size:15px;filter:drop-shadow(0 2px 2px #0008)}
+@keyframes sway{0%,100%{transform:rotate(7deg)}50%{transform:rotate(-7deg)}}
+@media (prefers-reduced-motion:reduce){.spider{animation:none}}
 </style>
 </head>
 <body>
 <header>
-  <h1>Boo-king Desk</h1>
+  <h1><span class="spooky-only">🎃 </span>Boo-king Desk</h1>
   <span class="sub">Hyro-style scheduling agent · Bayview Physical Therapy</span>
   <span class="sp"></span>
   <span id="backend" class="pill" style="cursor:pointer" title="Click to set the model">⚙ </span>
@@ -98,6 +132,7 @@ textarea{width:100%;font:inherit;font-size:12px}
     </optgroup>
     <option value="browser">Browser voice (offline)</option>
   </select>
+  <label class="sub" title="Halloween theme"><input type="checkbox" id="spooky"> 🎃</label>
   <button id="newcall">New call</button>
   <button id="reset">Reset data</button>
 </header>
@@ -116,6 +151,7 @@ textarea{width:100%;font:inherit;font-size:12px}
 </div>
 <main>
   <section>
+    <span class="spider spooky-only" aria-hidden="true"></span>
     <h2>Patient call <span id="verified" class="pill">unverified</span> <span id="callervoice" class="pill" title="Voice this caller asked for" style="text-transform:none"></span></h2>
     <div class="scroll" id="chat"></div>
     <div class="callerbar">
@@ -283,7 +319,7 @@ function renderChat(pending){
   let h = tr.map(m=>`<div class="msg ${m.who}">${esc(m.text)}</div>`).join('');
   if (pending && !(tr.length && tr[tr.length-1].text===pending && tr[tr.length-1].who==='patient')) h += `<div class="msg patient">${esc(pending)}</div>`;
   if (sending || s?.busy) h += `<div class="msg thinking">agent is working…</div>`;
-  if (!tr.length && !pending) h = `<div class="sub" style="color:var(--muted)">New call. Type as the caller, use the scenario chips, or hold the mic.</div>`;
+  if (!tr.length && !pending) h = `<div class="sub" style="color:var(--muted)"><span class="spooky-only">👻 </span>New call. Type as the caller, use the scenario chips, or hold the mic.</div>`;
   const el = $('#chat'); el.innerHTML = h; el.scrollTop = el.scrollHeight;
   const v = s?.verified; $('#verified').textContent = v?'identity verified':'unverified'; $('#verified').className='pill '+(v?'ok':'');
   const cv = s?.voice;
@@ -512,6 +548,14 @@ async function poll(){
     renderChat(); renderStaff(); renderBadges();
   } catch(e) {} finally { polling = false; }
 }
+// Halloween theme: on by default, remembered per browser.
+function setSpooky(on){ document.documentElement.classList.toggle('spooky', on); $('#spooky').checked = on;
+  try { localStorage.setItem('spooky', on ? '1' : '0'); } catch(e) {} }
+let spookyPref = '1';
+try { spookyPref = localStorage.getItem('spooky') ?? '1'; } catch(e) {}
+setSpooky(spookyPref === '1');
+$('#spooky').onchange = e => setSpooky(e.target.checked);
+
 setInterval(poll, 1000); poll();
 </script>
 </body>
