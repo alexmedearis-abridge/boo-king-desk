@@ -316,7 +316,7 @@ function patientCard(p){
   return `<div class="card" data-k="pt-${esc(p.id)}">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(p.name)}</b><span class="pill">${esc(p.request)}</span><span class="pill ${st}">${esc(p.status)}</span>
       ${p.verified_calls.length?`<span class="pill ok">verified on ${p.verified_calls.length} call${p.verified_calls.length>1?'s':''}</span>`:''}</div>
-    <dl class="kv"><dt>DOB</dt><dd>${esc(p.dob_masked)}</dd><dt>Phone</dt><dd>${esc(p.phone_masked)}</dd>
+    <dl class="kv"><dt>DOB</dt><dd><b>${esc(p.dob)}</b></dd><dt>Phone</dt><dd>${esc(p.phone_masked)}</dd>
       ${b?`<dt>Booked</dt><dd><b>${esc(b.when)}</b> · ${esc(b.provider)} · ${esc(b.location)}</dd>`:''}
       ${p.next_action?`<dt>Next action</dt><dd style="color:var(--warn)">${esc(p.next_action)}</dd>`:''}</dl>
     <div class="sub-h">Saved preferences</div>

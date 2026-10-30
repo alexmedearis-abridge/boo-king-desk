@@ -533,7 +533,9 @@ class Desk:
             calls = sorted({sid for sid, s in self.sessions.items() if s["verified"] == p["id"]})
             out.append({
                 "id": p["id"], "request": req["id"], "name": f"{p['name'][0]['given'][0]} {p['name'][0]['family']}",
-                "dob_masked": "••/••/" + p["birthDate"][:4], "phone_masked": "•••-•••-" + p["telecom"][0]["value"][-4:],
+                # DOB shown in full so the presenter can authenticate as each caller; phone stays masked.
+                "dob": datetime.strptime(p["birthDate"], "%Y-%m-%d").strftime("%B %-d, %Y"),
+                "phone_masked": "•••-•••-" + p["telecom"][0]["value"][-4:],
                 "status": req["status"], "review": req["review"], "next_action": req["next_action"],
                 "referral": ({k: ref[k] for k in ("type", "date", "authorized_visit_types", "valid_from", "valid_to", "completed_evaluation")}
                              | {"referring": next((l.split(": ", 1)[1] for l in ref["text"].splitlines() if l.startswith("Referring")), ""),
