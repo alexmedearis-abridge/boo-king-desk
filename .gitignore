@@ -9,3 +9,5 @@ __pycache__/
 .env
 # Share bundles
 *.zip
+# Local durable preference memory (including SQLite sidecars)
+bookingdesk/.runtime/
