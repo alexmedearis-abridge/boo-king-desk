@@ -1,0 +1,45 @@
+{
+ "id": "change_of_mind__chat_native",
+ "seed": "change_of_mind",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C4"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral.",
+  "Mornings at Downtown.",
+  "Actually, no mornings. Afternoons only, still Downtown.",
+  "The first one works."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "constraint_changes": [
+   {
+    "turn": 3,
+    "constraints": {
+     "time_of_day": "afternoon",
+     "location": "Downtown"
+    }
+   }
+  ],
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "dev"
+}

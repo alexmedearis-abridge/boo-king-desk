@@ -10,3 +10,6 @@ __pycache__/
 # Share bundles
 *.zip
 voice-samples/
+# Eval run output (regenerate with python3 -m evals.run)
+evals/reports/
+__pycache__/

@@ -1,0 +1,59 @@
+{
+ "id": "ch_change_mind_3x__chat_native",
+ "seed": "ch_change_mind_3x",
+ "claims": [
+  "C1",
+  "C2",
+  "C4"
+ ],
+ "suite": "challenge",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral.",
+  "Mornings at Downtown.",
+  "Actually, afternoons.",
+  "No wait, mornings again, but at Eastside.",
+  "Hmm, afternoons at Downtown after all.",
+  "The first one works."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "constraint_changes": [
+   {
+    "turn": 3,
+    "constraints": {
+     "time_of_day": "afternoon"
+    }
+   },
+   {
+    "turn": 4,
+    "constraints": {
+     "time_of_day": "morning",
+     "location": "Eastside"
+    }
+   },
+   {
+    "turn": 5,
+    "constraints": {
+     "time_of_day": "afternoon",
+     "location": "Downtown"
+    }
+   }
+  ],
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "calibration"
+}

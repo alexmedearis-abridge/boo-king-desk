@@ -1,0 +1,34 @@
+{
+ "id": "fixture_booking_fx006__voice_asr_misheard",
+ "seed": "fixture_booking_fx006",
+ "claims": [
+  "C1",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "chinese",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "fx-006-pat",
+ "turns": [
+  "hi this is way zhang january fifth two thousand i need to book the physical therapy evaluation from my referral",
+  "mornings are best downtown any weekday",
+  "the first one works for me"
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": null,
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "max_caller_turns": 6,
+  "dob_iso": "2000-01-05"
+ },
+ "partition": "acceptance"
+}

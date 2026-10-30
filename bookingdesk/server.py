@@ -1,6 +1,7 @@
 """Boo-king Desk demo server. Stdlib only: python3 server.py, then open http://localhost:8765"""
 import json
 import os
+import re
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -9,6 +10,20 @@ from agent import Desk  # noqa: E402
 
 DESK = Desk()
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPORTS = os.path.join(os.path.dirname(HERE), "evals", "reports")
+STAMP_RE = re.compile(r"^\d{8}T\d{6}$")
+ARTIFACT_RE = re.compile(r"^[a-z0-9_]{1,120}__r\d{1,2}\.json$")
+
+
+def _latest_report():
+    try:
+        stamp = open(os.path.join(REPORTS, "latest.txt")).read().strip()
+    except OSError:
+        return None
+    if not STAMP_RE.match(stamp):
+        return None
+    with open(os.path.join(REPORTS, stamp, "report.json")) as f:
+        return {"stamp": stamp, **json.load(f)}
 PORT = int(os.environ.get("PORT", "8765"))
 
 
@@ -60,6 +75,24 @@ class H(BaseHTTPRequestHandler):
             from urllib.parse import parse_qs, urlparse
             q = parse_qs(urlparse(self.path).query)
             self._tts(q.get("text", [""])[0], q.get("voice", [None])[0])
+        elif self.path == "/api/evals/latest":
+            # Read-only. Reports hold ids and scrubbed text only (no names, DOBs or phones).
+            try:
+                rep = _latest_report()
+            except (OSError, ValueError):
+                rep = None
+            self._json(rep or {"error": "No eval report yet. Run: python3 -m evals.run --partition dev"}, 200 if rep else 404)
+        elif self.path.startswith("/api/evals/artifact?"):
+            from urllib.parse import parse_qs, urlparse
+            q = parse_qs(urlparse(self.path).query)
+            stamp, name = q.get("stamp", [""])[0], q.get("file", [""])[0]
+            if not (STAMP_RE.match(stamp) and ARTIFACT_RE.match(name)):
+                return self._json({"error": "bad stamp or file"}, 400)
+            try:
+                with open(os.path.join(REPORTS, stamp, "artifacts", name)) as f:
+                    self._json(json.load(f))
+            except OSError:
+                self._json({"error": "not found"}, 404)
         elif self.path.startswith("/api/state"):
             since = int(self.path.split("since=")[1]) if "since=" in self.path else 0
             self._json(DESK.state(since))

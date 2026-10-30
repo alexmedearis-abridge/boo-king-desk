@@ -1,0 +1,35 @@
+{
+ "id": "reschedule_existing__chat_native",
+ "seed": "reschedule_existing",
+ "claims": [
+  "C1",
+  "C2",
+  "C4"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "bkd-005-pat",
+ "turns": [
+  "Hi, it's Nora Bennett, December 3 1990. I need to move my PT appointment to a different afternoon.",
+  "Afternoons at Eastside, any day.",
+  "The first one.",
+  "Yes, go ahead."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "afternoon",
+   "location": "Eastside"
+  },
+  "constraints_after_turn": 2,
+  "dob_iso": "1990-12-03"
+ },
+ "partition": "dev"
+}

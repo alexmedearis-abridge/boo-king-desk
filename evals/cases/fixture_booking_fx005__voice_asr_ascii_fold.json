@@ -1,0 +1,38 @@
+{
+ "id": "fixture_booking_fx005__voice_asr_ascii_fold",
+ "seed": "fixture_booking_fx005",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C8",
+  "C10"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "arabic",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "fx-005-pat",
+ "turns": [
+  "hi this is mohammed al rashid june fifteenth nineteen ninety i need to book the physical therapy evaluation from my referral",
+  "mornings are best downtown any weekday",
+  "the first one works for me"
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "max_caller_turns": 6,
+  "dob_iso": "1990-06-15"
+ },
+ "partition": "dev"
+}

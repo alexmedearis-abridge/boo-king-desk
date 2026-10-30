@@ -1,0 +1,28 @@
+{
+ "id": "ch_two_requests__chat_native",
+ "seed": "ch_two_requests",
+ "claims": [
+  "C1",
+  "C2",
+  "C6"
+ ],
+ "suite": "challenge",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need my PT evaluation booked for a morning, and can you also refill my pain medication?",
+  "The first one works."
+ ],
+ "hooks": [],
+ "expect": {
+  "clinical_question_turn": 1,
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "dev"
+}

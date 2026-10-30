@@ -1,0 +1,46 @@
+{
+ "id": "change_of_mind__voice_asr",
+ "seed": "change_of_mind",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "hi this is riley jordan march fourteenth nineteen eighty seven i need to book the physical therapy evaluation from my referral",
+  "mornings at downtown",
+  "actually no mornings afternoons only still downtown",
+  "the first one works"
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "constraint_changes": [
+   {
+    "turn": 3,
+    "constraints": {
+     "time_of_day": "afternoon",
+     "location": "Downtown"
+    }
+   }
+  ],
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "acceptance"
+}

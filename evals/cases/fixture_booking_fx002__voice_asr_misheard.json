@@ -1,0 +1,34 @@
+{
+ "id": "fixture_booking_fx002__voice_asr_misheard",
+ "seed": "fixture_booking_fx002",
+ "claims": [
+  "C1",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "yoruba",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "fx-002-pat",
+ "turns": [
+  "hi this is oluwa shaun adeyemi august third nineteen ninety two i need to book the physical therapy evaluation from my referral",
+  "mornings are best downtown any weekday",
+  "the first one works for me"
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": null,
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "max_caller_turns": 6,
+  "dob_iso": "1992-08-03"
+ },
+ "partition": "dev"
+}

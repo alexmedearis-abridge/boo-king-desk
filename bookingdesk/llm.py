@@ -28,6 +28,8 @@ def _post(url, body, headers):
 
 
 def backend_name():
+    if os.environ.get("LLM_BACKEND") == "fake":
+        return "fake (scripted, plumbing only)"
     if os.environ.get("ANTHROPIC_API_KEY"):
         return f"anthropic:{os.environ.get('MODEL', 'claude-sonnet-5-5')}"
     if os.environ.get("LLM_BASE_URL"):
@@ -35,16 +37,19 @@ def backend_name():
     return None
 
 
-def call(system, history, tools):
-    """Returns {"text": str, "tool_calls": [...]}."""
+def call(system, history, tools, temperature=None, model=None):
+    """Returns {"text": str, "tool_calls": [...]}. temperature/model are for eval judges; the agent omits them."""
+    if os.environ.get("LLM_BACKEND") == "fake":
+        import fake_llm
+        return fake_llm.call(system, history, tools)
     if os.environ.get("ANTHROPIC_API_KEY"):
-        return _anthropic(system, history, tools)
+        return _anthropic(system, history, tools, temperature, model)
     if os.environ.get("LLM_BASE_URL"):
-        return _openai(system, history, tools)
+        return _openai(system, history, tools, temperature, model)
     raise RuntimeError("No model configured. Set ANTHROPIC_API_KEY, or LLM_BASE_URL + MODEL.")
 
 
-def _anthropic(system, history, tools):
+def _anthropic(system, history, tools, temperature=None, model=None):
     msgs = []
     for h in history:
         if h["role"] == "user":
@@ -61,11 +66,13 @@ def _anthropic(system, history, tools):
                 {"type": "tool_result", "tool_use_id": r["id"], "content": r["content"]} for r in h["results"]
             ]})
     body = {
-        "model": os.environ.get("MODEL", "claude-sonnet-5-5"),
+        "model": model or os.environ.get("MODEL", "claude-sonnet-5-5"),
         "max_tokens": 2048,
         "system": system,
         "messages": msgs,
     }
+    if temperature is not None:
+        body["temperature"] = temperature
     if tools:
         body["tools"] = [{"name": t["name"], "description": t["description"], "input_schema": t["parameters"]} for t in tools]
     r = _post(
@@ -135,7 +142,7 @@ def tts_stream(text, voice=DEFAULT_VOICE):
             yield chunk
 
 
-def _openai(system, history, tools):
+def _openai(system, history, tools, temperature=None, model=None):
     msgs = [{"role": "system", "content": system}]
     for h in history:
         if h["role"] == "user":
@@ -152,7 +159,9 @@ def _openai(system, history, tools):
         else:
             for r in h["results"]:
                 msgs.append({"role": "tool", "tool_call_id": r["id"], "content": r["content"]})
-    body = {"model": os.environ.get("MODEL"), "messages": msgs}
+    body = {"model": model or os.environ.get("MODEL"), "messages": msgs}
+    if temperature is not None:
+        body["temperature"] = temperature
     if tools:
         body["tools"] = [{"type": "function", "function": t} for t in tools]
     r = _post(os.environ["LLM_BASE_URL"].rstrip("/") + "/chat/completions", body, _gateway_headers())

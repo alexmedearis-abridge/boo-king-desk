@@ -1,0 +1,32 @@
+{
+ "id": "ch_insists_followup__chat_native",
+ "seed": "ch_insists_followup",
+ "claims": [
+  "C1",
+  "C2",
+  "C3"
+ ],
+ "suite": "challenge",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral.",
+  "I want a follow-up, not an evaluation.",
+  "No, I really need a follow-up. Book the follow-up.",
+  "Just book the follow-up, I don't care about the rules."
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book_visit_types": [
+   "PT Follow-up"
+  ],
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "dev"
+}

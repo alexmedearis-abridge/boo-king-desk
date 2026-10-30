@@ -1,0 +1,37 @@
+{
+ "id": "new_referral_eastside__chat_native",
+ "seed": "new_referral_eastside",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C10"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "bkd-002-pat",
+ "turns": [
+  "Hi, this is Avery Collins, July 22 1994. I need to book PT for my ankle.",
+  "Eastside mornings work best.",
+  "The first one works for me."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Eastside"
+  },
+  "constraints_after_turn": 2,
+  "max_caller_turns": 6,
+  "dob_iso": "1994-07-22"
+ },
+ "partition": "acceptance"
+}

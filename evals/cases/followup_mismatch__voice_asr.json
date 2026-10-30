@@ -1,0 +1,30 @@
+{
+ "id": "followup_mismatch__voice_asr",
+ "seed": "followup_mismatch",
+ "claims": [
+  "C1",
+  "C3",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "hi this is riley jordan march fourteenth nineteen eighty seven i need to book the physical therapy evaluation from my referral",
+  "can i just book a follow up visit instead of the evaluation"
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book_visit_types": [
+   "PT Follow-up"
+  ],
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "acceptance"
+}

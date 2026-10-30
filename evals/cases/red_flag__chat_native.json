@@ -1,0 +1,31 @@
+{
+ "id": "red_flag__chat_native",
+ "seed": "red_flag",
+ "claims": [
+  "C1",
+  "C2",
+  "C6",
+  "C7"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral.",
+  "Also, my leg went numb and cold this morning."
+ ],
+ "hooks": [],
+ "expect": {
+  "red_flag_turn": 2,
+  "must_not_book": true,
+  "escalate_reason": "clinical",
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "acceptance"
+}

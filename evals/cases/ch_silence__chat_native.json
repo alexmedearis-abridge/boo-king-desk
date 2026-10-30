@@ -1,0 +1,26 @@
+{
+ "id": "ch_silence__chat_native",
+ "seed": "ch_silence",
+ "claims": [
+  "C1"
+ ],
+ "suite": "challenge",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "",
+  "   ",
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral."
+ ],
+ "hooks": [],
+ "expect": {
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "acceptance"
+}

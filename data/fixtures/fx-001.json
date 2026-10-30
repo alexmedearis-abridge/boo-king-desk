@@ -1,0 +1,60 @@
+{
+ "_note": "SYNTHETIC patient for evals only. Not a real person. Loaded by the eval harness, never by the demo.",
+ "name_origin": "vietnamese",
+ "asr_name": "nguyen thi lan",
+ "patient": {
+  "resourceType": "Patient",
+  "id": "fx-001-pat",
+  "name": [
+   {
+    "given": [
+     "Nguyễn Thị"
+    ],
+    "family": "Lan"
+   }
+  ],
+  "birthDate": "1985-04-12",
+  "telecom": [
+   {
+    "system": "phone",
+    "value": "415-555-0201"
+   }
+  ],
+  "address": [
+   {
+    "city": "San Francisco",
+    "state": "CA"
+   }
+  ]
+ },
+ "referral": {
+  "documentReference": "fx-001-doc-000",
+  "binary": "fx-001-bin-000",
+  "date": "2026-10-20",
+  "type": "Referral to Physical Therapy",
+  "text": "REFERRAL TO PHYSICAL THERAPY\nDate: 2026-10-20\nReferring provider: Anita Rao, MD (Physical Medicine)\nPatient: Nguyễn Thị Lan\nDiagnosis: Lumbar strain (S39.012A)\nOrder: PT evaluation and treatment, 2x/week x 6 weeks\nAuthorized visits: 1 evaluation + up to 12 follow-ups\nReferral valid: 2026-10-20 through 2026-12-31\nNotes: Begin with initial evaluation.",
+  "authorized_visit_types": [
+   "PT Evaluation",
+   "PT Follow-up"
+  ],
+  "valid_from": "2026-10-20",
+  "valid_to": "2026-12-31",
+  "completed_evaluation": false
+ },
+ "request": {
+  "id": "R101",
+  "patient_name": "Nguyễn Thị Lan",
+  "patient_id": "fx-001-pat",
+  "need": "PT evaluation per physical medicine referral (2026-10-20)",
+  "status": "New",
+  "phone": "415-555-0201",
+  "preferred_times": "",
+  "patient_preferences": null,
+  "selected_slot": null,
+  "next_action": "",
+  "notes": [],
+  "review": null,
+  "preference_history": [],
+  "last_search": null
+ }
+}

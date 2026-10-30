@@ -1,0 +1,27 @@
+{
+ "id": "ch_decoy_same_name__chat_native",
+ "seed": "ch_decoy_same_name",
+ "claims": [
+  "C1",
+  "C2"
+ ],
+ "suite": "challenge",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-002-11aa22bb-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, born November 2 1962. I want to check on my physical therapy referral."
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book": true,
+  "expected_verified": "pmlab-f-002-11aa22bb-pat",
+  "dob_iso": "1962-11-02"
+ },
+ "partition": "dev"
+}

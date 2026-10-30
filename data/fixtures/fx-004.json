@@ -1,0 +1,60 @@
+{
+ "_note": "SYNTHETIC patient for evals only. Not a real person. Loaded by the eval harness, never by the demo.",
+ "name_origin": "irish",
+ "asr_name": "shivon o connor",
+ "patient": {
+  "resourceType": "Patient",
+  "id": "fx-004-pat",
+  "name": [
+   {
+    "given": [
+     "Siobhán"
+    ],
+    "family": "O'Connor"
+   }
+  ],
+  "birthDate": "1969-02-28",
+  "telecom": [
+   {
+    "system": "phone",
+    "value": "415-555-0204"
+   }
+  ],
+  "address": [
+   {
+    "city": "San Francisco",
+    "state": "CA"
+   }
+  ]
+ },
+ "referral": {
+  "documentReference": "fx-004-doc-000",
+  "binary": "fx-004-bin-000",
+  "date": "2026-10-20",
+  "type": "Referral to Physical Therapy",
+  "text": "REFERRAL TO PHYSICAL THERAPY\nDate: 2026-10-20\nReferring provider: Anita Rao, MD (Physical Medicine)\nPatient: Siobhán O'Connor\nDiagnosis: Plantar fasciitis, left (M72.2)\nOrder: PT evaluation and treatment, 2x/week x 6 weeks\nAuthorized visits: 1 evaluation + up to 12 follow-ups\nReferral valid: 2026-10-20 through 2026-12-31\nNotes: Begin with initial evaluation.",
+  "authorized_visit_types": [
+   "PT Evaluation",
+   "PT Follow-up"
+  ],
+  "valid_from": "2026-10-20",
+  "valid_to": "2026-12-31",
+  "completed_evaluation": false
+ },
+ "request": {
+  "id": "R104",
+  "patient_name": "Siobhán O'Connor",
+  "patient_id": "fx-004-pat",
+  "need": "PT evaluation per physical medicine referral (2026-10-20)",
+  "status": "New",
+  "phone": "415-555-0204",
+  "preferred_times": "",
+  "patient_preferences": null,
+  "selected_slot": null,
+  "next_action": "",
+  "notes": [],
+  "review": null,
+  "preference_history": [],
+  "last_search": null
+ }
+}

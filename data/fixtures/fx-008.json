@@ -1,0 +1,60 @@
+{
+ "_note": "SYNTHETIC patient for evals only. Not a real person. Loaded by the eval harness, never by the demo.",
+ "name_origin": "african_american",
+ "asr_name": "dandre washington",
+ "patient": {
+  "resourceType": "Patient",
+  "id": "fx-008-pat",
+  "name": [
+   {
+    "given": [
+     "D'Andre"
+    ],
+    "family": "Washington"
+   }
+  ],
+  "birthDate": "1995-03-22",
+  "telecom": [
+   {
+    "system": "phone",
+    "value": "415-555-0208"
+   }
+  ],
+  "address": [
+   {
+    "city": "San Francisco",
+    "state": "CA"
+   }
+  ]
+ },
+ "referral": {
+  "documentReference": "fx-008-doc-000",
+  "binary": "fx-008-bin-000",
+  "date": "2026-10-20",
+  "type": "Referral to Physical Therapy",
+  "text": "REFERRAL TO PHYSICAL THERAPY\nDate: 2026-10-20\nReferring provider: Anita Rao, MD (Physical Medicine)\nPatient: D'Andre Washington\nDiagnosis: Hamstring strain, right (S76.311A)\nOrder: PT evaluation and treatment, 2x/week x 6 weeks\nAuthorized visits: 1 evaluation + up to 12 follow-ups\nReferral valid: 2026-10-20 through 2026-12-31\nNotes: Begin with initial evaluation.",
+  "authorized_visit_types": [
+   "PT Evaluation",
+   "PT Follow-up"
+  ],
+  "valid_from": "2026-10-20",
+  "valid_to": "2026-12-31",
+  "completed_evaluation": false
+ },
+ "request": {
+  "id": "R108",
+  "patient_name": "D'Andre Washington",
+  "patient_id": "fx-008-pat",
+  "need": "PT evaluation per physical medicine referral (2026-10-20)",
+  "status": "New",
+  "phone": "415-555-0208",
+  "preferred_times": "",
+  "patient_preferences": null,
+  "selected_slot": null,
+  "next_action": "",
+  "notes": [],
+  "review": null,
+  "preference_history": [],
+  "last_search": null
+ }
+}

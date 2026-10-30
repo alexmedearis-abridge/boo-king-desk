@@ -1,0 +1,44 @@
+{
+ "id": "happy_path__voice_older",
+ "seed": "happy_path",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C8",
+  "C10"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "older"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Good morning, dear. My doctor told me to call about the physical therapy. I'm Riley Jordan, and my birthday is the fourteenth of march nineteen eighty seven.",
+  "I'd rather come in the mornings if I could, to the Downtown office. Any weekday is fine.",
+  "Oh, the first one sounds just fine."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "visit_type": "PT Evaluation",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "must_call": [
+   "find_patient",
+   "get_referral",
+   "book_slot"
+  ],
+  "max_caller_turns": 6,
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "calibration"
+}

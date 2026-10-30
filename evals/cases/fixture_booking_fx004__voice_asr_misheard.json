@@ -1,0 +1,34 @@
+{
+ "id": "fixture_booking_fx004__voice_asr_misheard",
+ "seed": "fixture_booking_fx004",
+ "claims": [
+  "C1",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "irish",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "fx-004-pat",
+ "turns": [
+  "hi this is shivon o connor february twenty eighth nineteen sixty nine i need to book the physical therapy evaluation from my referral",
+  "mornings are best downtown any weekday",
+  "the first one works for me"
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": null,
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "max_caller_turns": 6,
+  "dob_iso": "1969-02-28"
+ },
+ "partition": "acceptance"
+}

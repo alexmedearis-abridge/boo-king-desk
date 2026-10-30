@@ -65,3 +65,14 @@ A second "Riley Jordan" (born 1962) exists so name-only matching would pick the 
 - **Epic Twin**: `data.py` holds a FHIR-shaped Patient and referral (DocumentReference → Binary). The Riley DOB here (1987-03-14) is made up. To use the real chart, swap `t_find_patient` / `t_get_referral` in `agent.py` for GETs to the Twin URLs (VNet required).
 - **Notion**: Available Times and Patient Requests are kept in memory with the same fields as the Front Office Desks example. Notion-backed tools can replace them behind the same tool names.
 - **SMS**: an outbox panel.
+
+## Evals
+
+An offline eval suite lives in `evals/`, and its claims, bars and how-to are in [EVALS.md](../EVALS.md). Quick start from the repo root:
+
+```bash
+python3 -m unittest discover -s tests
+LLM_BACKEND=fake python3 -m evals.run --partition dev --suite all --runs 1
+```
+
+The Staff desk's **Evals** tab shows the latest report.

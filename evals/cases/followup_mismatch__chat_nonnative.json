@@ -1,0 +1,28 @@
+{
+ "id": "followup_mismatch__chat_nonnative",
+ "seed": "followup_mismatch",
+ "claims": [
+  "C1",
+  "C3"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "non_native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral.",
+  "Can I make only follow-up visit, not the evaluation?"
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book_visit_types": [
+   "PT Follow-up"
+  ]
+ },
+ "partition": "dev"
+}

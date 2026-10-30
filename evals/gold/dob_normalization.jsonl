@@ -1,0 +1,70 @@
+{"spoken": "september 30 1941", "form": "digits_words", "expected": "1941-09-30", "id": "dob_001"}
+{"spoken": "9/30/1941", "form": "slashes", "expected": "1941-09-30", "id": "dob_002"}
+{"spoken": "may 30 1958", "form": "digits_words", "expected": "1958-05-30", "id": "dob_003"}
+{"spoken": "may thirtieth nineteen fifty eight", "form": "words", "expected": "1958-05-30", "id": "dob_004"}
+{"spoken": "11/2/1962", "form": "slashes", "expected": "1962-11-02", "id": "dob_005"}
+{"spoken": "the second of november nineteen sixty two", "form": "the_of", "expected": "1962-11-02", "id": "dob_006"}
+{"spoken": "two twenty eight nineteen sixty nine", "form": "numeric_spoken", "expected": "1969-02-28", "id": "dob_007"}
+{"spoken": "february 28 1969", "form": "digits_words", "expected": "1969-02-28", "id": "dob_008"}
+{"spoken": "11/21/1978", "form": "slashes", "expected": "1978-11-21", "id": "dob_009"}
+{"spoken": "november 21 1978", "form": "digits_words", "expected": "1978-11-21", "id": "dob_010"}
+{"spoken": "one nine nineteen seventy nine", "form": "numeric_spoken", "expected": "1979-01-09", "id": "dob_011"}
+{"spoken": "january 9 1979", "form": "digits_words", "expected": "1979-01-09", "id": "dob_012"}
+{"spoken": "the twelfth of april nineteen eighty five", "form": "the_of", "expected": "1985-04-12", "id": "dob_013"}
+{"spoken": "four twelve nineteen eighty five", "form": "numeric_spoken", "expected": "1985-04-12", "id": "dob_014"}
+{"spoken": "3/14/1987", "form": "slashes", "expected": "1987-03-14", "id": "dob_015"}
+{"spoken": "the fourteenth of march nineteen eighty seven", "form": "the_of", "expected": "1987-03-14", "id": "dob_016"}
+{"spoken": "six fifteen nineteen ninety", "form": "numeric_spoken", "expected": "1990-06-15", "id": "dob_017"}
+{"spoken": "june fifteenth nineteen ninety", "form": "words", "expected": "1990-06-15", "id": "dob_018"}
+{"spoken": "december third nineteen ninety", "form": "words", "expected": "1990-12-03", "id": "dob_019"}
+{"spoken": "twelve three nineteen ninety", "form": "numeric_spoken", "expected": "1990-12-03", "id": "dob_020"}
+{"spoken": "the third of august nineteen ninety two", "form": "the_of", "expected": "1992-08-03", "id": "dob_021"}
+{"spoken": "august 3 1992", "form": "digits_words", "expected": "1992-08-03", "id": "dob_022"}
+{"spoken": "7/22/1994", "form": "slashes", "expected": "1994-07-22", "id": "dob_023"}
+{"spoken": "seven twenty two nineteen ninety four", "form": "numeric_spoken", "expected": "1994-07-22", "id": "dob_024"}
+{"spoken": "3/22/1995", "form": "slashes", "expected": "1995-03-22", "id": "dob_025"}
+{"spoken": "march twenty second nineteen ninety five", "form": "words", "expected": "1995-03-22", "id": "dob_026"}
+{"spoken": "january 5 2000", "form": "digits_words", "expected": "2000-01-05", "id": "dob_027"}
+{"spoken": "one five two thousand", "form": "numeric_spoken", "expected": "2000-01-05", "id": "dob_028"}
+{"spoken": "nine seventeen two thousand one", "form": "numeric_spoken", "expected": "2001-09-17", "id": "dob_029"}
+{"spoken": "9/17/2001", "form": "slashes", "expected": "2001-09-17", "id": "dob_030"}
+{"spoken": "twelve twelve nineteen fifty eight", "form": "numeric_spoken", "expected": "1958-12-12", "id": "dob_031"}
+{"spoken": "the twelfth of december nineteen fifty eight", "form": "the_of", "expected": "1958-12-12", "id": "dob_032"}
+{"spoken": "seven eleven nineteen fifty two", "form": "numeric_spoken", "expected": "1952-07-11", "id": "dob_033"}
+{"spoken": "the eleventh of july nineteen fifty two", "form": "the_of", "expected": "1952-07-11", "id": "dob_034"}
+{"spoken": "12/23/1949", "form": "slashes", "expected": "1949-12-23", "id": "dob_035"}
+{"spoken": "december twenty third nineteen forty nine", "form": "words", "expected": "1949-12-23", "id": "dob_036"}
+{"spoken": "9/10/1992", "form": "slashes", "expected": "1992-09-10", "id": "dob_037"}
+{"spoken": "nine ten nineteen ninety two", "form": "numeric_spoken", "expected": "1992-09-10", "id": "dob_038"}
+{"spoken": "two seven nineteen thirty nine", "form": "numeric_spoken", "expected": "1939-02-07", "id": "dob_039"}
+{"spoken": "february seventh nineteen thirty nine", "form": "words", "expected": "1939-02-07", "id": "dob_040"}
+{"spoken": "three twenty two nineteen sixty six", "form": "numeric_spoken", "expected": "1966-03-22", "id": "dob_041"}
+{"spoken": "the twenty second of march nineteen sixty six", "form": "the_of", "expected": "1966-03-22", "id": "dob_042"}
+{"spoken": "the thirteenth of october nineteen thirty six", "form": "the_of", "expected": "1936-10-13", "id": "dob_043"}
+{"spoken": "10/13/1936", "form": "slashes", "expected": "1936-10-13", "id": "dob_044"}
+{"spoken": "july 25 1986", "form": "digits_words", "expected": "1986-07-25", "id": "dob_045"}
+{"spoken": "july twenty fifth nineteen eighty six", "form": "words", "expected": "1986-07-25", "id": "dob_046"}
+{"spoken": "5/22/2005", "form": "slashes", "expected": "2005-05-22", "id": "dob_047"}
+{"spoken": "five twenty two two thousand five", "form": "numeric_spoken", "expected": "2005-05-22", "id": "dob_048"}
+{"spoken": "nine four nineteen eighty nine", "form": "numeric_spoken", "expected": "1989-09-04", "id": "dob_049"}
+{"spoken": "september fourth nineteen eighty nine", "form": "words", "expected": "1989-09-04", "id": "dob_050"}
+{"spoken": "the fourth of april nineteen forty four", "form": "the_of", "expected": "1944-04-04", "id": "dob_051"}
+{"spoken": "4/4/1944", "form": "slashes", "expected": "1944-04-04", "id": "dob_052"}
+{"spoken": "the sixteenth of july nineteen eighty seven", "form": "the_of", "expected": "1987-07-16", "id": "dob_053"}
+{"spoken": "july 16 1987", "form": "digits_words", "expected": "1987-07-16", "id": "dob_054"}
+{"spoken": "february eighteenth nineteen forty four", "form": "words", "expected": "1944-02-18", "id": "dob_055"}
+{"spoken": "2/18/1944", "form": "slashes", "expected": "1944-02-18", "id": "dob_056"}
+{"spoken": "seven eighteen nineteen ninety four", "form": "numeric_spoken", "expected": "1994-07-18", "id": "dob_057"}
+{"spoken": "7/18/1994", "form": "slashes", "expected": "1994-07-18", "id": "dob_058"}
+{"spoken": "the fifteenth of june nineteen eighty", "form": "the_of", "expected": "1980-06-15", "id": "dob_059"}
+{"spoken": "june fifteenth nineteen eighty", "form": "words", "expected": "1980-06-15", "id": "dob_060"}
+{"spoken": "september nineteen forty one", "form": "month_year_only", "expected": null, "id": "dob_061"}
+{"spoken": "may nineteen fifty eight", "form": "month_year_only", "expected": null, "id": "dob_062"}
+{"spoken": "november nineteen sixty two", "form": "month_year_only", "expected": null, "id": "dob_063"}
+{"spoken": "february nineteen sixty nine", "form": "month_year_only", "expected": null, "id": "dob_064"}
+{"spoken": "november nineteen seventy eight", "form": "month_year_only", "expected": null, "id": "dob_065"}
+{"spoken": "january nineteen seventy nine", "form": "month_year_only", "expected": null, "id": "dob_066"}
+{"spoken": "april nineteen eighty five", "form": "month_year_only", "expected": null, "id": "dob_067"}
+{"spoken": "march nineteen eighty seven", "form": "month_year_only", "expected": null, "id": "dob_068"}
+{"spoken": "june nineteen ninety", "form": "month_year_only", "expected": null, "id": "dob_069"}
+{"spoken": "december nineteen ninety", "form": "month_year_only", "expected": null, "id": "dob_070"}

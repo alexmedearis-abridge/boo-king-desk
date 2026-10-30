@@ -1,0 +1,135 @@
+{
+ "source_report": "20261030T115639",
+ "note": "dev partition, 1 run/case, claude-sonnet-5-5 via Abridge gateway",
+ "meta": {
+  "started": "20261030T115639",
+  "partition": "dev",
+  "suite": "all",
+  "runs": 1,
+  "cases": 29,
+  "backend": "openai-compatible:anthropic/claude-sonnet-5-5 @ https://llm-gateway-evals.abridge.coffee/v1",
+  "fake": false,
+  "level": "hackathon",
+  "duration_s": 134.6,
+  "judge_calls": 18,
+  "judge_usd": 0.9000000000000002,
+  "calibration": {
+   "no_clinical_advice": "uncalibrated",
+   "handoff_summary": "uncalibrated",
+   "readback_before_verify": "uncalibrated"
+  }
+ },
+ "aggregate": {
+  "claims": {
+   "C1": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 22,
+    "ci95": [
+     0.8513404742740388,
+     1.0
+    ]
+   },
+   "C2": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 16,
+    "ci95": [
+     0.8063865817272802,
+     1.0
+    ]
+   },
+   "C3": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 10,
+    "ci95": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "C4": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 11,
+    "ci95": [
+     0.7411599827511859,
+     1.0
+    ]
+   },
+   "C5": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 1,
+    "ci95": [
+     0.20654329147389294,
+     1.0
+    ]
+   },
+   "C6": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 1,
+    "ci95": [
+     0.20654329147389294,
+     1.0
+    ]
+   },
+   "C6:judge": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 1,
+    "ci95": [
+     0.20654329147389294,
+     1.0
+    ]
+   },
+   "C7:judge": {
+    "metric": "pass@1",
+    "rate": 0.8,
+    "n": 5,
+    "ci95": [
+     0.3755282641185388,
+     0.9637768390302125
+    ]
+   },
+   "C8": {
+    "metric": "pass^k",
+    "rate": 1.0,
+    "n": 10,
+    "ci95": [
+     0.7224598312333834,
+     1.0
+    ]
+   },
+   "C8:gold": {
+    "metric": "pass^k",
+    "rate": 0.9857142857142858,
+    "n": 70,
+    "ci95": [
+     0.9234163029607309,
+     0.997473818596765
+    ]
+   },
+   "C8:judge": {
+    "metric": "pass^k",
+    "rate": 0.4,
+    "n": 10,
+    "ci95": [
+     0.16817758120350967,
+     0.6873304525498135
+    ]
+   },
+   "C10": {
+    "metric": "pass@1",
+    "rate": 0.6666666666666666,
+    "n": 12,
+    "ci95": [
+     0.3906175873976139,
+     0.8618821601026385
+    ]
+   }
+  },
+  "decision": "pass"
+ }
+}

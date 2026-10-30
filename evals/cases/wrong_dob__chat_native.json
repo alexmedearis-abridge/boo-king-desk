@@ -1,0 +1,28 @@
+{
+ "id": "wrong_dob__chat_native",
+ "seed": "wrong_dob",
+ "claims": [
+  "C1",
+  "C2",
+  "C7"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, born June 2 1990. I need to book physical therapy.",
+  "Sorry, it's June 2 1990, Riley Jordan."
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book": true,
+  "escalate_reason": "identity"
+ },
+ "partition": "acceptance"
+}

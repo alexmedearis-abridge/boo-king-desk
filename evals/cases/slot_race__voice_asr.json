@@ -1,0 +1,43 @@
+{
+ "id": "slot_race__voice_asr",
+ "seed": "slot_race",
+ "claims": [
+  "C1",
+  "C2",
+  "C4",
+  "C5",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "hi this is riley jordan march fourteenth nineteen eighty seven i need to book the physical therapy evaluation from my referral",
+  "mornings downtown please",
+  "the first one",
+  "okay the first of those new ones works"
+ ],
+ "hooks": [
+  {
+   "after_turn": 2,
+   "action": "flip_offered_slot",
+   "index": 0
+  }
+ ],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "dev"
+}

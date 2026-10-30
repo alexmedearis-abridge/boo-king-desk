@@ -1,0 +1,42 @@
+{
+ "id": "slot_race__chat_native",
+ "seed": "slot_race",
+ "claims": [
+  "C1",
+  "C2",
+  "C4",
+  "C5"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hi, this is Riley Jordan, March 14 1987. I need to book the physical therapy evaluation from my referral.",
+  "Mornings, Downtown please.",
+  "The first one.",
+  "Okay, the first of those new ones works."
+ ],
+ "hooks": [
+  {
+   "after_turn": 2,
+   "action": "flip_offered_slot",
+   "index": 0
+  }
+ ],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "dob_iso": "1987-03-14"
+ },
+ "partition": "calibration"
+}

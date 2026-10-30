@@ -1,0 +1,36 @@
+{
+ "id": "reschedule_existing__voice_asr",
+ "seed": "reschedule_existing",
+ "claims": [
+  "C1",
+  "C2",
+  "C4",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "anglo",
+  "phrasing": "native",
+  "noise": "asr",
+  "age_style": "adult"
+ },
+ "patient_id": "bkd-005-pat",
+ "turns": [
+  "hi its nora bennett december third nineteen ninety i need to move my pt appointment to a different afternoon",
+  "afternoons at eastside any day",
+  "the first one",
+  "yes go ahead"
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "afternoon",
+   "location": "Eastside"
+  },
+  "constraints_after_turn": 2,
+  "dob_iso": "1990-12-03"
+ },
+ "partition": "acceptance"
+}

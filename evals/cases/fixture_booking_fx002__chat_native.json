@@ -1,0 +1,37 @@
+{
+ "id": "fixture_booking_fx002__chat_native",
+ "seed": "fixture_booking_fx002",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C10"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "yoruba",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "fx-002-pat",
+ "turns": [
+  "Hi, this is Oluwaseun Adeyemi, August 3 1992. I need to book the physical therapy evaluation from my referral.",
+  "Mornings are best, Downtown, any weekday.",
+  "The first one works for me."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "max_caller_turns": 6,
+  "dob_iso": "1992-08-03"
+ },
+ "partition": "dev"
+}

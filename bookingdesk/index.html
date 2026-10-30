@@ -143,6 +143,7 @@ textarea{width:100%;font:inherit;font-size:12px}
         <button data-t="slots">Available Times <i id="b-slots"></i></button>
         <button data-t="sms">SMS <i id="b-sms"></i></button>
         <button data-t="learn">Learning <i id="b-learn"></i></button>
+        <button data-t="evals">Evals <i id="b-evals"></i></button>
       </span></h2>
     <div class="scroll" id="staff"></div>
   </section>
@@ -223,7 +224,7 @@ $('#newcall').onclick = () => { sid = 'call-' + Date.now().toString(36); traceLe
 $('#reset').onclick = async () => { if(!confirm('Reset all slots, requests and calls to seed data?'))return; await api('/api/reset', {}); traceLen=0; $('#trace').innerHTML=''; sid='call-'+Date.now().toString(36); poll(); };
 $('#dry').onchange = e => api('/api/dry_run', {on: e.target.checked});
 $('#showprompt').onclick = e => { $('#prompt').classList.toggle('hidden'); $('#trace').classList.toggle('hidden'); e.target.classList.toggle('on'); };
-$('#stabs').onclick = e => { const t=e.target.dataset.t; if(!t)return; tab=t; document.querySelectorAll('#stabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); const bd=$('#b-'+t); if(bd) bd.classList.remove('hot'); renderStaff(true); };
+$('#stabs').onclick = e => { const t=e.target.dataset.t; if(!t)return; tab=t; document.querySelectorAll('#stabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); const bd=$('#b-'+t); if(bd) bd.classList.remove('hot'); if (t==='evals' && !evalsState.report) loadEvals(); renderStaff(true); };
 
 // Model settings panel.
 $('#backend').onclick = () => $('#cfg').classList.toggle('hidden');
@@ -335,6 +336,62 @@ function patientCard(p){
   </div>`;
 }
 
+// ---------- Evals tab: latest offline report, read-only ----------
+let evalsState = {loading:false, report:null, error:null, open:null, artifact:null};
+async function loadEvals(){
+  evalsState = {...evalsState, loading:true}; renderStaff(true);
+  try { const r = await fetch('/api/evals/latest'); const j = await r.json();
+        evalsState = {...evalsState, loading:false, report: r.ok ? j : null, error: r.ok ? null : j.error}; }
+  catch(e){ evalsState = {...evalsState, loading:false, error:String(e)}; }
+  renderStaff(true);
+}
+async function openRun(file){
+  if (evalsState.open === file) { evalsState = {...evalsState, open:null, artifact:null}; return renderStaff(true); }
+  const a = await (await fetch('/api/evals/artifact?' + new URLSearchParams({stamp: evalsState.report.stamp, file}))).json();
+  evalsState = {...evalsState, open:file, artifact:a}; renderStaff(true);
+}
+window.loadEvals = loadEvals; window.openRun = openRun;
+function pct(x){ return x==null ? '–' : Math.round(x*100)+'%'; }
+function evalsHTML(){
+  const e = evalsState;
+  if (e.loading) return '<div class="sub" style="color:var(--muted)">Loading the latest report…</div>';
+  if (!e.report) return `<div class="card">${esc(e.error||'No report loaded.')}<div style="margin-top:6px"><button onclick="loadEvals()">Load latest report</button></div></div>`;
+  const R = e.report, A = R.aggregate, M = R.meta;
+  const dec = A.decision, cls = dec==='fail'?'bad':dec==='inconclusive'?'warn':'ok';
+  let h = `<div class="card"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Exit decision</b><span class="pill ${cls}">${esc(dec.toUpperCase())}</span>
+    <span class="sub" style="color:var(--muted)">${esc(R.stamp)} · ${esc(M.partition)} · ${esc(M.suite)} · ${M.runs} run(s) · ${M.cases} cases</span>
+    <button style="margin-left:auto" onclick="loadEvals()">Refresh</button></div>
+    ${M.fake?'<div style="color:var(--bad);font-weight:600;margin-top:4px">FAKE MODEL: plumbing only, not a quality result</div>':''}
+    <div class="notes">${A.reasons.map(esc).join('<br>')}</div></div>`;
+  const table = (stats, title) => {
+    const rows = Object.values(stats).map(s=>{
+      const st = s.status + (s.judge && M.calibration[s.judge]!=='calibrated' ? ' · uncalibrated' : '');
+      const scls = s.status==='meets bar'?'ok':s.status==='below bar'?'bad':'';
+      const w = s.worst_stratum;
+      return `<tr><td><b>${esc(s.claim)}</b>${s.must_have?'':' <span class="sub" style="color:var(--muted)">(info)</span>'}</td><td>${pct(s.rate)}</td>
+        <td>${s.ci95[0]==null?'–':pct(s.ci95[0])+'–'+pct(s.ci95[1])}</td><td>${s.n}</td><td>${pct(s.bar)}</td>
+        <td><span class="pill ${scls}">${esc(st)}</span></td><td>${w?esc(w.stratum)+' '+pct(w.rate):'–'}</td></tr>`;}).join('');
+    return `<div class="sub-h">${title}</div><table><tr><th>Claim</th><th>Result</th><th>95% CI</th><th>n</th><th>Bar</th><th>Status</th><th>Worst stratum</th></tr>${rows}</table>`;
+  };
+  h += table(A.claims, 'Representative suite');
+  if (Object.keys(A.challenge||{}).length) h += table(A.challenge, 'Challenge suite (separate)');
+  h += `<div class="sub" style="color:var(--muted);margin-top:6px">Latency p95 ${A.latency.p95_ms??'–'} ms over ${A.latency.turns} turns · judge calls ${M.judge_calls}</div>`;
+  const fails = [];
+  for (const r of R.results) for (const g of [...r.grades, ...(r.judges||[])]) if (g.verdict==='fail') fails.push({r, g});
+  h += `<div class="sub-h">Failures <span class="pill">${fails.length}</span></div>`;
+  h += fails.slice(0,60).map(({r,g})=>{
+    const file = r.artifact.split('/').pop(), open = e.open===file;
+    const why = (g.evidence||[]).map(x=>(x.i!=null?'#'+x.i+' ':'')+x.why).join('; ') || g.rationale || '';
+    let body = '';
+    if (open && e.artifact) {
+      body = `<div style="margin-top:6px">` + e.artifact.turns.map(t=>`<div class="msg patient" style="max-width:100%">${esc(t.caller||'(silence)')}</div><div class="msg agent" style="max-width:100%">${esc(t.reply||t.error||'')}</div>`).join('') +
+        `<pre style="font-size:11px;white-space:pre-wrap;max-height:220px;overflow:auto">${e.artifact.trace.filter(t=>t.kind==='tool'||t.kind==='guardrail'||t.kind==='staff').map(t=>`#${t.i} ${t.tool||t.kind} ${t.reason?'· '+t.reason:''}\n   → ${JSON.stringify(t.result||t.detail||t.action).slice(0,240)}`).map(esc).join('\n')}</pre></div>`;
+    }
+    return `<div class="card" style="cursor:pointer" onclick="openRun('${esc(file)}')"><b>${esc(g.claim)}</b> · <code>${esc(r.case_id)}</code> run ${r.run}<div class="notes">${esc(why)}</div>${body}</div>`;
+  }).join('') || '<div style="color:var(--muted)">None.</div>';
+  return h;
+}
+
 function firstName(pid){ const p = (S.patients||[]).find(x=>x.id===pid); return p ? p.name.split(' ')[0] : 'patient'; }
 // Patient tab follows whoever is verified on the current call, unless you pick someone.
 let ptPick = null;
@@ -349,7 +406,7 @@ let staffKey = '', cardSigs = {};
 function renderStaff(force){
   if (!S) return;
   // Redraw only when what this tab shows has changed, so clicks, scroll and focus survive polling.
-  const view = {requests:[S.requests,S.slots.filter(x=>x.booked_for)], patient:[S.patients,ptPick,sid], slots:[S.slots,slotFilter], sms:[S.outbox], learn:[S.provider_prefs,S.corrections,S.candidate_rules]}[tab];
+  const view = {requests:[S.requests,S.slots.filter(x=>x.booked_for)], patient:[S.patients,ptPick,sid], slots:[S.slots,slotFilter], sms:[S.outbox], learn:[S.provider_prefs,S.corrections,S.candidate_rules], evals:[evalsState]}[tab];
   const key = tab + JSON.stringify(view);
   if (!force && key === staffKey) return;
   const sameTab = staffKey.startsWith(tab);
@@ -381,6 +438,8 @@ function renderStaff(force){
       rows.map(s=>`<tr data-k="sl-${s.id}" class="${s.booked_for?'mine':''}"><td>${s.id}</td><td>${esc(s.label)}</td><td>${esc(s.provider.replace(', PT',''))}</td><td>${s.location}</td><td>${s.visit_type.replace('PT ','')}</td>
         <td><span class="pill ${s.status==='Available'?'ok':''}">${s.status}</span>${s.booked_for?` <span class="pill warn">${esc(firstName(s.booked_for))}</span>`:''}</td>
         <td><button class="flip" onclick="flip('${s.id}')">Flip</button></td></tr>`).join('') + `</table>`;
+  } else if (tab==='evals'){
+    h += evalsHTML();
   } else if (tab==='sms'){
     h += S.outbox.length ? S.outbox.slice().reverse().map((m,i)=>`<div class="sms" data-k="sms-${S.outbox.length-i}"><div class="sub" style="color:var(--muted)">to ${esc(m.to)} · ${esc(m.at)}${m.dry_run?' · dry run':''}</div>${esc(m.body)}</div>`).join('') : '<div style="color:var(--muted)">No messages sent yet.</div>';
   } else {

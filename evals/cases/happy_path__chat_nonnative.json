@@ -1,0 +1,42 @@
+{
+ "id": "happy_path__chat_nonnative",
+ "seed": "happy_path",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C10"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "anglo",
+  "phrasing": "non_native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "pmlab-f-001-df8d27e9-pat",
+ "turns": [
+  "Hello, I want make appointment for physical therapy, doctor send referral. My name Riley Jordan, born March 14 1987.",
+  "Morning time is better for me. Downtown office please, any day ok.",
+  "First one is good, please book."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "visit_type": "PT Evaluation",
+  "constraints": {
+   "time_of_day": "morning",
+   "location": "Downtown"
+  },
+  "constraints_after_turn": 2,
+  "must_call": [
+   "find_patient",
+   "get_referral",
+   "book_slot"
+  ],
+  "max_caller_turns": 6
+ },
+ "partition": "acceptance"
+}

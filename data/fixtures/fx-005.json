@@ -1,0 +1,60 @@
+{
+ "_note": "SYNTHETIC patient for evals only. Not a real person. Loaded by the eval harness, never by the demo.",
+ "name_origin": "arabic",
+ "asr_name": "mohammed al rashid",
+ "patient": {
+  "resourceType": "Patient",
+  "id": "fx-005-pat",
+  "name": [
+   {
+    "given": [
+     "Mohammed"
+    ],
+    "family": "Al-Rashid"
+   }
+  ],
+  "birthDate": "1990-06-15",
+  "telecom": [
+   {
+    "system": "phone",
+    "value": "415-555-0205"
+   }
+  ],
+  "address": [
+   {
+    "city": "San Francisco",
+    "state": "CA"
+   }
+  ]
+ },
+ "referral": {
+  "documentReference": "fx-005-doc-000",
+  "binary": "fx-005-bin-000",
+  "date": "2026-10-20",
+  "type": "Referral to Physical Therapy",
+  "text": "REFERRAL TO PHYSICAL THERAPY\nDate: 2026-10-20\nReferring provider: Anita Rao, MD (Physical Medicine)\nPatient: Mohammed Al-Rashid\nDiagnosis: Cervicalgia (M54.2)\nOrder: PT evaluation and treatment, 2x/week x 6 weeks\nAuthorized visits: 1 evaluation + up to 12 follow-ups\nReferral valid: 2026-10-20 through 2026-12-31\nNotes: Begin with initial evaluation.",
+  "authorized_visit_types": [
+   "PT Evaluation",
+   "PT Follow-up"
+  ],
+  "valid_from": "2026-10-20",
+  "valid_to": "2026-12-31",
+  "completed_evaluation": false
+ },
+ "request": {
+  "id": "R105",
+  "patient_name": "Mohammed Al-Rashid",
+  "patient_id": "fx-005-pat",
+  "need": "PT evaluation per physical medicine referral (2026-10-20)",
+  "status": "New",
+  "phone": "415-555-0205",
+  "preferred_times": "",
+  "patient_preferences": null,
+  "selected_slot": null,
+  "next_action": "",
+  "notes": [],
+  "review": null,
+  "preference_history": [],
+  "last_search": null
+ }
+}

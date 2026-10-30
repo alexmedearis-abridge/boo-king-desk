@@ -1,0 +1,32 @@
+{
+ "id": "followup_allowed__chat_native",
+ "seed": "followup_allowed",
+ "claims": [
+  "C1",
+  "C2",
+  "C3",
+  "C10"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "east_asian",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "bkd-003-pat",
+ "turns": [
+  "Hi, Morgan Lee, January 9 1979. I need to book my next PT follow-up visit.",
+  "Yes, those preferences still work.",
+  "The first one works."
+ ],
+ "hooks": [],
+ "expect": {
+  "final_request_status": "Booked",
+  "visit_type": "PT Follow-up",
+  "max_caller_turns": 6,
+  "dob_iso": "1979-01-09"
+ },
+ "partition": "acceptance"
+}

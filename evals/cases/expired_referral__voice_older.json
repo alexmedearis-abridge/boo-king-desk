@@ -1,0 +1,29 @@
+{
+ "id": "expired_referral__voice_older",
+ "seed": "expired_referral",
+ "claims": [
+  "C1",
+  "C2",
+  "C7",
+  "C8"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "voice",
+  "name_origin": "chinese",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "older"
+ },
+ "patient_id": "bkd-004-pat",
+ "turns": [
+  "Hello there. This is Harold Chen, born the thirtieth of may nineteen fifty eight. My doctor wanted me to do therapy on my shoulder."
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book": true,
+  "escalate_reason": "out_of_policy",
+  "dob_iso": "1958-05-30"
+ },
+ "partition": "acceptance"
+}

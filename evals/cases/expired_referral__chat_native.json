@@ -1,0 +1,28 @@
+{
+ "id": "expired_referral__chat_native",
+ "seed": "expired_referral",
+ "claims": [
+  "C1",
+  "C2",
+  "C7"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "chinese",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "bkd-004-pat",
+ "turns": [
+  "Hello, Harold Chen, May 30 1958. I want to schedule my shoulder physical therapy."
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book": true,
+  "escalate_reason": "out_of_policy",
+  "dob_iso": "1958-05-30"
+ },
+ "partition": "dev"
+}

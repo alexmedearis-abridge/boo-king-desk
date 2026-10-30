@@ -1,0 +1,28 @@
+{
+ "id": "no_referral__chat_native",
+ "seed": "no_referral",
+ "claims": [
+  "C1",
+  "C2",
+  "C7"
+ ],
+ "suite": "representative",
+ "strata": {
+  "channel": "chat",
+  "name_origin": "south_asian",
+  "phrasing": "native",
+  "noise": "clean",
+  "age_style": "adult"
+ },
+ "patient_id": "bkd-006-pat",
+ "turns": [
+  "Hi, Sam Patel, September 17 2001. I'd like to book physical therapy for my shoulder."
+ ],
+ "hooks": [],
+ "expect": {
+  "must_not_book": true,
+  "escalate_reason": "out_of_policy",
+  "dob_iso": "2001-09-17"
+ },
+ "partition": "acceptance"
+}
